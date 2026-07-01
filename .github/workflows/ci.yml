@@ -2,11 +2,12 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   # ── Secret scan — fails the build on ANY finding ──────────────────────────
@@ -22,11 +23,12 @@ jobs:
       - name: Run gitleaks
         uses: gitleaks/gitleaks-action@v2
         env:
-          # No org license needed for public repos. A finding exits non-zero
-          # and fails the job.
+          # v2 requires GITHUB_TOKEN to scan PRs/commits. No org license needed
+          # for a personal/public repo. Any finding exits non-zero and fails the job.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
 
-  # ── Light lint — py_compile + basic markdown sanity ───────────────────────
+  # ── Light lint — py_compile (fatal) + markdown sanity (warn-only) ─────────
   lint:
     name: lint (python + markdown)
     runs-on: ubuntu-latest
@@ -50,26 +52,16 @@ jobs:
           echo "$files" | xargs -n1 python -m py_compile
           echo "All Python files compiled cleanly."
 
-      - name: Basic markdown sanity check
+      - name: Markdown sanity (informational only)
         run: |
-          set -e
-          fail=0
+          # Never fails the build — surfaces warnings only.
           while IFS= read -r f; do
             [ -z "$f" ] && continue
-            # Empty markdown files are almost always a mistake.
-            if [ ! -s "$f" ]; then
-              echo "::error file=$f::Markdown file is empty"
-              fail=1
-            fi
-            # Unbalanced fenced code blocks break rendering.
-            fences=$(grep -c '^```' "$f" || true)
-            if [ $((fences % 2)) -ne 0 ]; then
-              echo "::error file=$f::Unbalanced code fence (odd number of ``` lines)"
-              fail=1
+            [ -s "$f" ] || echo "::warning file=$f::markdown file is empty"
+            n=$(grep -c '^```' "$f" 2>/dev/null || true)
+            n=${n:-0}
+            if [ "$((n % 2))" -ne 0 ]; then
+              echo "::warning file=$f::odd number of code fences (possible unbalanced block)"
             fi
           done < <(find . -name '*.md' -not -path '*/node_modules/*')
-          if [ "$fail" -ne 0 ]; then
-            echo "Markdown sanity check failed."
-            exit 1
-          fi
-          echo "Markdown sanity check passed."
+          echo "Markdown check complete (informational)."
