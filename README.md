@@ -164,28 +164,52 @@ Real jobs LeRoy runs, start to finish:
 
 ## 🚦 Choose your path
 
-LeRoy meets you where you are. Pick the on-ramp that fits:
+> ### 👉 First — where do these commands go?
+> LeRoy runs on **[Claude Code](https://www.anthropic.com/claude-code)**, Anthropic's free
+> command-line tool. You type the commands below into your computer's **terminal** — **not** the
+> Claude desktop app and **not** the Claude website.
+> - **Windows:** click **Start**, type **PowerShell**, press Enter. That window is your terminal.
+> - **macOS:** press **⌘ + Space**, type **Terminal**, press Enter.
+>
+> Then paste the lines **one at a time**, pressing Enter after each. No coding required.
 
-### 🌱 New here (new to Claude Code, not very technical)
-You'll be talking to your AI company in ~15 minutes — no jargon.
-```bash
-# 1. install Claude Code (one installer — link in docs)
-# 2. get LeRoy:
-git clone https://github.com/Zeekeey-jpeg/LeRoy-HQ leroy && cd leroy && ./setup
-leroy init      # a friendly interview builds your brain
-leroy           # start talking (the terminal is the full experience)
-```
-`leroy doctor` explains any problem in plain English. `leroy reset` undoes everything. No commands to memorize — LeRoy predicts what you need.
-LeRoy can also create a desktop shortcut so you just double-click to launch it.
+### 🌱 New here (never touched a terminal — that's totally fine)
+You'll be talking to your AI company in about 15 minutes.
 
-### 🔁 Already use Claude Code
-Adopt LeRoy **without losing your setup.**
+**1. Install Claude Code** — one installer: **https://www.anthropic.com/claude-code**
+**2. Open your terminal** — PowerShell on Windows, Terminal on macOS (see the box above).
+**3. Get LeRoy** — paste these one at a time:
 ```bash
-./setup                 # detects your ~/.claude, backs it up, merges LeRoy in additively
-# memory, mesh & gate are core (installed above). Add the opt-in modules when ready:
-leroy add boardroom     # or: leroy add security  (auth-gated)
+git clone https://github.com/Zeekeey-jpeg/LeRoy-HQ leroy
+cd leroy
+.\setup.ps1          # Windows.   On macOS/Linux instead run:   ./setup
 ```
-Your existing skills and settings are preserved. `leroy update` later pulls improvements and **never touches your memory.**
+**4. Meet LeRoy** — it runs a friendly interview and builds your memory:
+```bash
+leroy init
+```
+**5. Start talking:**
+```bash
+leroy
+```
+Stuck at any point? Type **`leroy doctor`** — it checks everything and tells you, in plain
+English, exactly how to fix whatever's missing. **`leroy reset`** undoes the whole install.
+During setup LeRoy can also add a **desktop shortcut**, so next time you just **double-click**
+to launch it — no terminal needed.
+
+### 🔁 Already comfortable in a terminal / already use Claude Code
+Adopt LeRoy **without losing your setup.** In your terminal:
+```bash
+git clone https://github.com/Zeekeey-jpeg/LeRoy-HQ leroy
+cd leroy
+.\setup.ps1          # Windows   (macOS/Linux:  ./setup)
+```
+`setup` detects your existing `~/.claude`, backs it up, and merges LeRoy in **additively** — your
+skills and settings are preserved. Add the opt-in modules when you want them:
+```bash
+leroy add boardroom     # or:  leroy add security   (auth-gated)
+```
+`leroy update` later pulls improvements and **never touches your memory.**
 
 <details>
 <summary><b>🧠 Expert / builder — bend it to your will</b></summary>
