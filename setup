@@ -1,0 +1,131 @@
+#!/usr/bin/env sh
+# LeRoy — setup  (macOS / Linux bootstrap)
+#
+# Turns your Claude Code into LeRoy. Mirrors the six steps in
+# onboarding-and-install.md:
+#
+#   1. Preflight (doctor.py)  2. Backup + additive merge of core/
+#   3. Install Python deps    4. Register `leroy` on PATH
+#   5. leroy init interview   6. "you're live" card
+#
+# All paths derive from $HOME/.claude — nothing hardcoded. No secrets touched.
+#
+# STATUS: best-effort skeleton. The Windows setup.ps1 is the reference
+# implementation. TODOs below mark the cross-platform work still to harden.
+#
+# Usage:
+#   ./setup                 full install
+#   ./setup --skip-init     merge + install, skip the interview
+#   ./setup --skip-deps     skip pip install
+
+set -eu
+
+SKIP_INIT=0
+SKIP_DEPS=0
+for arg in "$@"; do
+    case "$arg" in
+        --skip-init) SKIP_INIT=1 ;;
+        --skip-deps) SKIP_DEPS=1 ;;
+    esac
+done
+
+REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+INSTALLER="$REPO_ROOT/installer"
+BIN_DIR="$REPO_ROOT/bin"
+CLAUDE_HOME="$HOME/.claude"
+
+section() { printf '\n== %s ==\n' "$*"; }
+say()     { printf '  %s\n' "$*"; }
+
+find_python() {
+    for c in python3 python; do
+        if command -v "$c" >/dev/null 2>&1; then printf '%s' "$c"; return 0; fi
+    done
+    return 1
+}
+
+printf '\n  Installing LeRoy — your AI company, in your terminal.\n'
+say "Repo: $REPO_ROOT"
+
+# --- Step 1: preflight ------------------------------------------------------
+section "1/6  Preflight check"
+if ! PY="$(find_python)"; then
+    say "Python 3.11+ is required and wasn't found on PATH."
+    say "Install it (e.g. 'brew install python' or your distro's package), then re-run ./setup."
+    exit 1
+fi
+if ! "$PY" "$INSTALLER/doctor.py"; then
+    say "Prerequisites are missing (see above). Fix them, then re-run ./setup."
+    exit 1
+fi
+
+# --- Step 2: backup + additive merge ---------------------------------------
+section "2/6  Merge LeRoy into ~/.claude (backup first)"
+if [ -d "$CLAUDE_HOME" ]; then
+    say "Existing ~/.claude detected — it will be backed up before any change."
+else
+    say "No existing ~/.claude — fresh install."
+fi
+if ! "$PY" "$INSTALLER/merge.py"; then
+    say "Merge failed. Nothing was overwritten (backup is intact)."
+    exit 1
+fi
+
+# --- Step 3: python deps ----------------------------------------------------
+section "3/6  Install Python dependencies"
+if [ "$SKIP_DEPS" -eq 1 ]; then
+    say "Skipped (--skip-deps)."
+elif [ -f "$REPO_ROOT/requirements.txt" ]; then
+    # TODO(cross-platform): prefer a venv over --user on managed Pythons (PEP 668).
+    say "Installing from requirements.txt..."
+    "$PY" -m pip install --user -q -r "$REPO_ROOT/requirements.txt" \
+        || say "pip reported an error — continuing (installer/CLI are stdlib-only)."
+else
+    say "No requirements.txt — installer + CLI are stdlib-only, nothing to install."
+fi
+
+# --- Step 4: register `leroy` on PATH --------------------------------------
+section "4/6  Register the 'leroy' command"
+USER_BIN="$HOME/.local/bin"
+mkdir -p "$USER_BIN"
+# Symlink the repo CLI so `leroy update` keeps the command current.
+ln -sf "$BIN_DIR/leroy" "$USER_BIN/leroy"
+chmod +x "$BIN_DIR/leroy" 2>/dev/null || true
+say "Registered: leroy -> $BIN_DIR/leroy"
+case ":$PATH:" in
+    *":$USER_BIN:"*) say "$USER_BIN already on PATH." ;;
+    *)
+        # TODO(cross-platform): detect the user's actual shell rc (zsh/bash/fish)
+        # instead of assuming ~/.profile.
+        say "Add this to your shell profile so 'leroy' is found:"
+        say "    export PATH=\"\$HOME/.local/bin:\$PATH\""
+        ;;
+esac
+
+# --- Step 5: the interview --------------------------------------------------
+section "5/6  Get-to-know-you interview"
+if [ "$SKIP_INIT" -eq 1 ]; then
+    say "Skipped (--skip-init). Run 'leroy init' whenever you're ready."
+else
+    "$PY" "$INSTALLER/wizard.py"
+fi
+
+# --- Step 6: you're live ----------------------------------------------------
+section "6/6  You're live"
+cat <<'EOF'
+
+  +--------------------------------------------------------------+
+  |  LeRoy is installed. Welcome aboard.                         |
+  |                                                              |
+  |   Start a session ....... leroy                             |
+  |   Health check .......... leroy doctor                      |
+  |   See your memory ....... leroy memory                      |
+  |   Desktop app (beta) .... leroy start                       |
+  |   Update later .......... leroy update                      |
+  |   Undo everything ....... leroy reset                       |
+  |                                                              |
+  |  Your memory lives at ~/.claude/memory/                     |
+  |  (Open a NEW terminal so 'leroy' is on your PATH.)          |
+  +--------------------------------------------------------------+
+
+EOF

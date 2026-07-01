@@ -1,0 +1,55 @@
+{
+  "_comment": "LeRoy Core hook wiring — MERGED ADDITIVELY into the user's ~/.claude/settings.json by the installer (installer/merge.py). Do not clobber the user's existing hooks. Paths use ~/.claude and `python3`; on Windows the installer rewrites `python3` to the detected interpreter (e.g. python.exe) and normalizes the path. Every hook fails OPEN — a missing interpreter or hook file must never break the tool pipeline.",
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command", "command": "python3 \"~/.claude/hooks/session-resume-preflight.py\"" } ] },
+      { "hooks": [ { "type": "command", "command": "python3 \"~/.claude/hooks/gate-enforcer.py\"" } ] },
+      { "hooks": [ { "type": "command", "command": "python3 \"~/.claude/hooks/memory-live-capture.py\"" } ] },
+      { "hooks": [ { "type": "command", "command": "python3 \"~/.claude/hooks/orchestration-planner.py\"" } ] }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell|CronCreate",
+        "hooks": [ { "type": "command", "command": "python3 \"~/.claude/hooks/cron-creation-guard.py\"" } ]
+      },
+      {
+        "matcher": "Task|Agent",
+        "hooks": [
+          { "type": "command", "command": "python3 \"~/.claude/hooks/agent-spawn-validator.py\"" },
+          { "type": "command", "command": "python3 \"~/.claude/hooks/agent-spawn-logger.py\"" }
+        ]
+      },
+      {
+        "matcher": "AskUserQuestion",
+        "hooks": [ { "type": "command", "command": "python3 \"~/.claude/hooks/debate-auto-invoke.py\"" } ]
+      },
+      {
+        "_comment": "Outbound identity + PII guards. Matcher targets any email send/draft MCP tool. Adjust to the MCP prefixes you actually use; the guard itself is config-driven via ~/.claude/session/outbound-identity.json and fails open if unconfigured.",
+        "matcher": ".*(send|draft|createDraft|create_draft|reply).*",
+        "hooks": [
+          { "type": "command", "command": "python3 \"~/.claude/hooks/pii-pre-send.py\"" },
+          { "type": "command", "command": "python3 \"~/.claude/hooks/outbound-identity-guard.py\"" }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [ { "type": "command", "command": "python3 \"~/.claude/hooks/pii-pre-write.py\"" } ]
+      },
+      {
+        "matcher": ".*",
+        "hooks": [ { "type": "command", "command": "python3 \"~/.claude/hooks/untrusted-content-guard.py\"" } ]
+      }
+    ],
+    "PostToolUse": [
+      { "hooks": [ { "type": "command", "command": "python3 \"~/.claude/hooks/post-tool-handler.py\"" } ] },
+      { "hooks": [ { "type": "command", "command": "python3 \"~/.claude/hooks/error-remediator.py\"" } ] },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [ { "type": "command", "command": "python3 \"~/.claude/hooks/syntax-check.py\"" } ]
+      }
+    ],
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "python3 \"~/.claude/hooks/memory-session-flush.py\"" } ] }
+    ]
+  }
+}

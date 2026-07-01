@@ -1,0 +1,46 @@
+{
+  "_doc": "Default Governor policy for the Boardroom. Conservative on purpose — tune to your plan. Token ceilings are runaway-loop backstops, NOT cadence levers: set them high enough that your intended cadence never trips them, low enough that a bug cannot run away. See governor.md for the full spec.",
+  "enabled": true,
+  "mode": "schedule",
+
+  "schedule_hours_local": [2, 6, 10, 14, 18, 22],
+  "quiet_hours_local": [],
+
+  "window_hours": 5,
+  "window_token_ceiling": 600000,
+  "daily_token_ceiling": 1500000,
+  "max_scenes_per_window": 6,
+  "max_scenes_per_day": 12,
+  "max_conversations": 20,
+
+  "work_mix": {
+    "min_green": 0.25,
+    "min_approval": 0.10,
+    "_remainder": "monitoring"
+  },
+
+  "model_tiering": {
+    "primary_model": "claude-opus-4-8",
+    "routine_model": null,
+    "decision_stakes_impact": 7,
+    "_help": "primary_model runs decision-stakes scenes. routine_model (a smaller or local model) runs low-stakes heartbeats; set to null to use primary_model for everything. decision_stakes_impact: topics scoring >= this on the 1-10 impact scale use the primary model."
+  },
+
+  "dynamic_mode": {
+    "_help": "Only used when mode == 'dynamic'. Ignored in schedule mode.",
+    "idle_threshold_minutes": 45,
+    "idle_cadence_minutes": 15,
+    "active_cadence_minutes": 75,
+    "human_active_pause_minutes": 8,
+    "min_impact_priority": 60
+  },
+
+  "_field_help": {
+    "mode": "'schedule' = convene at fixed clock hours (scheduled scenes are forced but still respect token ceilings + kill switch). 'dynamic' = self-throttle by human activity + impact gate.",
+    "schedule_hours_local": "Local-clock hours (0-23) at which the room convenes one scene. Check every ~15 min; each slot fires once per day.",
+    "window_token_ceiling": "Runaway backstop per rolling window (window_hours).",
+    "daily_token_ceiling": "Runaway backstop per 24h.",
+    "max_conversations": "Live conversations retained; oldest beyond this are archived.",
+    "kill_switch": "Create the disable flag (see installer output) to pause instantly; it overrides everything here."
+  }
+}

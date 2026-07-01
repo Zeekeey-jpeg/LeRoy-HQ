@@ -1,0 +1,71 @@
+{
+  "_comment": "LeRoy autonomy defaults. Philosophy: ship the working car; the user turns on autonomy and picks options. Non-burning, safe features are ON by default. Token-burning / autonomous features are OFF by default and offered a la carte during `leroy init`. NOTHING autonomous is installed or scheduled until the user approves it. The wizard writes the user's actual picks to ~/.claude/config/autonomy.json; only enabled features get wired later (via `leroy enable <feature>`).",
+  "version": 1,
+
+  "on_by_default": {
+    "_comment": "Good, non-burning features. Installed and active out of the box. No timers, no autonomous token spend.",
+    "self_growing_memory": {
+      "label": "Self-growing memory",
+      "plain": "I remember what we work on and get sharper every session — no save button, ever.",
+      "token_cost": "none (writes plain files locally)",
+      "autonomous": false
+    },
+    "self_heal_observe": {
+      "label": "Self-heal (observe only)",
+      "plain": "I watch my own health and note problems, but I do not fix anything on a timer without you.",
+      "token_cost": "none (observation only; the timed auto-fix loop is the OFF-by-default 'scheduled_automations' item)",
+      "autonomous": false
+    },
+    "gate": {
+      "label": "Session gate",
+      "plain": "Every request routes through one front door so nothing gets skipped.",
+      "token_cost": "none",
+      "autonomous": false
+    },
+    "routing": {
+      "label": "Smart routing",
+      "plain": "I send each task to the right specialist automatically.",
+      "token_cost": "none",
+      "autonomous": false
+    },
+    "mcp_builder": {
+      "label": "MCP builder",
+      "plain": "You can say 'talk to my Notion' and I will help wire the connector.",
+      "token_cost": "none until you use it",
+      "autonomous": false
+    }
+  },
+
+  "off_by_default": {
+    "_comment": "Autonomous / token-burning features. Offered a la carte during onboarding, each DEFAULT NO. Recorded but NOT installed or scheduled until `leroy enable <feature>`.",
+    "boardroom": {
+      "label": "Boardroom",
+      "plain": "A simulated C-suite that debates your decisions and watches the system for improvements.",
+      "token_cost": "token-heavy; recommended only on Claude Max",
+      "autonomous": true,
+      "recommends_max": true,
+      "wires": "registers the boardroom scene cron + enables the boardroom module"
+    },
+    "morning_briefing": {
+      "label": "Morning briefing",
+      "plain": "A short daily digest each morning; can fold in boardroom findings.",
+      "token_cost": "light-to-moderate daily (one digest per day)",
+      "autonomous": true,
+      "wires": "registers a daily morning-briefing cron"
+    },
+    "email_digests": {
+      "label": "Email digests / outbound",
+      "plain": "I can send you digests or draft outbound email on a schedule.",
+      "token_cost": "moderate; scales with volume",
+      "autonomous": true,
+      "wires": "registers the digest/outbound cron (outbound stays draft-gated by the gmail guard)"
+    },
+    "scheduled_automations": {
+      "label": "Scheduled automations / crons",
+      "plain": "Timed background jobs: self-heal on a timer, automatic backups, watchdogs, etc.",
+      "token_cost": "varies by job; can add up if several run",
+      "autonomous": true,
+      "wires": "registers the selected background crons (self-heal timer, backup, watchdog)"
+    }
+  }
+}

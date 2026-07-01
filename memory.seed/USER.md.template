@@ -1,0 +1,38 @@
+# USER.md — Who You Are
+
+> This tells LeRoy who it's working for. Fill it in, or let `leroy init` build it with you.
+> The more LeRoy knows here, the sharper its recall and routing. Loaded every session.
+
+## Identity
+
+- **Name:** <your name>
+- **Role / title:** <what you do>
+- **Company / context:** <your company, or "independent">
+- **Location / timezone:** <optional — helps with scheduling and dates>
+- **Contact:** user@example.com
+
+## How Technical I Am
+
+<e.g. "Comfortable with code and the command line" / "Not a developer — explain in plain terms.">
+This tells LeRoy how much to explain and how deep to go.
+
+## How I Like To Be Talked To
+
+- **Length:** <brief and direct | thorough and detailed>
+- **Tone:** <plain and no-nonsense | warm | formal>
+- **Confirmation:** <ask before anything outward-facing | just do it and report>
+
+## What I'm Working On
+
+<1-3 current focuses. These seed your Projects/ and Goals/ folders so recall isn't empty
+on day one. Example: "Shipping v2 of my product; hiring a first engineer.">
+
+## Tools I Use
+
+<CRM, email, calendar, database, etc. LeRoy can build a connector for any of these with
+`leroy mcp add`. Example: "a CRM, Gmail, a Postgres database.">
+
+## Hard Rules & Pet Peeves
+
+<Anything LeRoy must always/never do. Example: "Never send an email without showing me first."
+These become Feedback/ notes — the corrections layer that makes LeRoy feel like your team.>

@@ -1,0 +1,192 @@
+#!/usr/bin/env sh
+# LeRoy CLI (macOS / Linux) — dispatches leroy subcommands.
+#
+#   leroy [chat]        Start a session (drops into Claude Code with LeRoy loaded)
+#   leroy init          First-run interview + build your memory vault
+#   leroy doctor        Health check: prereqs, MCPs, sidecar + autonomy on/off
+#   leroy enable <f>    Turn on an autonomy feature (and wire it)
+#   leroy disable <f>   Turn off an autonomy feature (and unschedule it)
+#   leroy add <module>  A la carte: memory | boardroom | mesh | gate | security
+#   leroy mcp add       Conversationally build a new connector
+#   leroy memory        Open the vault / show stats
+#   leroy start         Launch the desktop app (beta, desktop-only)
+#   leroy update        Pull upstream code (never touches your grown memory)
+#   leroy reset         Clean rollback (restores the pre-LeRoy backup)
+#
+# init / doctor / merge are wired. start/desktop are stubs.
+# All paths derive from $HOME/.claude — nothing hardcoded.
+#
+# NOTE (cross-platform TODO): this POSIX version is a best-effort skeleton.
+# The Windows leroy.ps1 is the reference implementation; the reset/update flows
+# here mirror it but want more testing on macOS/Linux before GA.
+
+set -eu
+
+# --- path anchors -----------------------------------------------------------
+# Resolve the repo root = parent of the dir holding this script.
+SELF="$0"
+# Follow one level of symlink if `leroy` was symlinked onto PATH.
+if [ -L "$SELF" ]; then SELF="$(readlink "$SELF")"; fi
+BIN_DIR="$(cd "$(dirname "$SELF")" && pwd)"
+REPO_ROOT="$(cd "$BIN_DIR/.." && pwd)"
+CLAUDE_HOME="$HOME/.claude"
+INSTALLER="$REPO_ROOT/installer"
+
+say() { printf '  %s\n' "$*"; }
+
+find_python() {
+    for c in python3 python; do
+        if command -v "$c" >/dev/null 2>&1; then
+            printf '%s' "$c"
+            return 0
+        fi
+    done
+    say "Python 3.11+ not found on PATH. Run 'leroy doctor' for how to fix." >&2
+    exit 1
+}
+
+run_py() {
+    _script="$1"; shift
+    _py="$(find_python)"
+    _path="$INSTALLER/$_script"
+    [ -f "$_path" ] || { say "missing installer script: $_path" >&2; exit 1; }
+    "$_py" "$_path" "$@"
+}
+
+cmd_doctor() {
+    # `set -e` would abort on a non-zero doctor exit; capture it instead so the
+    # autonomy summary always prints after the prereq check.
+    _rc=0
+    run_py doctor.py "$@" || _rc=$?
+    # Follow the prereq check with the autonomy on/off summary.
+    run_py autonomy.py status || true
+    return $_rc
+}
+
+cmd_enable() {
+    [ $# -ge 1 ] || { say "Usage: leroy enable <boardroom|morning_briefing|email_digests|scheduled_automations>"; exit 1; }
+    run_py autonomy.py enable "$1"
+}
+
+cmd_disable() {
+    [ $# -ge 1 ] || { say "Usage: leroy disable <feature>"; exit 1; }
+    run_py autonomy.py disable "$1"
+}
+
+cmd_init() {
+    say "Running prerequisite check..."
+    if ! run_py doctor.py; then
+        say "Fix the prerequisites above, then re-run 'leroy init'."
+        exit 1
+    fi
+    run_py wizard.py "$@"
+}
+
+cmd_merge() { run_py merge.py "$@"; }
+
+cmd_chat() {
+    if ! command -v claude >/dev/null 2>&1; then
+        say "Claude Code (claude) isn't on PATH. Run 'leroy doctor' for the install link."
+        exit 1
+    fi
+    say "Starting a LeRoy session..."
+    # Claude Code auto-loads ~/.claude, so LeRoy is live.
+    exec claude "$@"
+}
+
+cmd_add() {
+    [ $# -ge 1 ] || { say "Usage: leroy add <boardroom|security>   (memory, mesh & gate are core — already installed)"; exit 1; }
+    module="$1"
+    mod_src="$REPO_ROOT/modules/$module"
+    [ -d "$mod_src" ] || { say "Unknown module '$module'. Opt-in modules: boardroom, security. (memory, mesh, gate are core.)"; exit 1; }
+    # Each module ships its own installer — it handles auth-gates (security) and
+    # opt-in / default-off wiring (boardroom). Fall back to a plain additive merge.
+    if [ -f "$mod_src/install.sh" ]; then
+        sh "$mod_src/install.sh"; exit $?
+    fi
+    say "Adding module '$module' (additive merge)..."
+    run_py merge.py --source "$mod_src"
+}
+
+cmd_mcp() {
+    if [ "${1:-}" = "add" ]; then
+        say "[stub] leroy mcp add — conversational connector builder."
+        say "Will scaffold from: $REPO_ROOT/mcps/_template"
+        say "Then start a session and say e.g. 'talk to my Notion' to wire it."
+        exit 0
+    fi
+    say "Usage: leroy mcp add"
+    exit 1
+}
+
+cmd_memory() {
+    vault="$CLAUDE_HOME/memory"
+    [ -d "$vault" ] || { say "No vault yet. Run 'leroy init' to build one."; exit 1; }
+    count="$(find "$vault" -type f -name '*.md' 2>/dev/null | wc -l | tr -d ' ')"
+    size="$(du -sh "$vault" 2>/dev/null | cut -f1 || echo '?')"
+    say "Vault: $vault"
+    say "Notes: $count markdown file(s), $size on disk"
+    say "Open it in your editor or Obsidian to browse."
+}
+
+cmd_start() {
+    say "The LeRoy desktop app is coming in a future release (v1.1) — it's not part of this build."
+    say "LeRoy v1 is CLI-first and fully complete. Run 'leroy' to start a session."
+}
+
+cmd_update() {
+    [ -d "$REPO_ROOT/.git" ] || { say "Not a git checkout — re-clone to get the latest."; exit 1; }
+    ( cd "$REPO_ROOT" && say "Pulling upstream (your memory vault is never touched)..." && git pull --ff-only )
+    say "Re-running additive merge to apply any new core files..."
+    run_py merge.py >/dev/null
+    say "Update complete."
+}
+
+cmd_reset() {
+    parent="$(dirname "$CLAUDE_HOME")"
+    latest="$(ls -d "$parent"/.claude.backup-* 2>/dev/null | sort | tail -n1 || true)"
+    [ -n "$latest" ] || { say "No pre-LeRoy backup found (~/.claude.backup-*). Nothing to restore."; exit 1; }
+    say "This will restore your pre-LeRoy config from:"
+    say "  $latest"
+    printf '  Type '\''restore'\'' to proceed: '
+    read -r confirm
+    [ "$confirm" = "restore" ] || { say "Aborted."; exit 1; }
+    stamp="$(date +%Y-%m-%d-%H%M%S)"
+    [ -d "$CLAUDE_HOME" ] && mv "$CLAUDE_HOME" "$CLAUDE_HOME.pre-reset-$stamp"
+    cp -R "$latest" "$CLAUDE_HOME"
+    say "Restored. Your current config was moved aside to .claude.pre-reset-$stamp."
+}
+
+usage() {
+    cat <<'EOF'
+
+  leroy <command>
+    (chat)      start a session       init       first-run interview
+    doctor      health check          add <m>    add a module
+    enable <f>  turn on a feature     disable<f> turn off a feature
+    mcp add     build a connector     memory     vault stats
+    start       desktop app (beta)    update     pull upstream
+    reset       restore pre-LeRoy backup
+
+EOF
+}
+
+# --- dispatch ---------------------------------------------------------------
+COMMAND="${1:-chat}"
+[ $# -gt 0 ] && shift || true
+
+case "$COMMAND" in
+    chat|"")            cmd_chat "$@" ;;
+    init)               cmd_init "$@" ;;
+    doctor)             cmd_doctor "$@" ;;
+    enable)             cmd_enable "$@" ;;
+    disable)            cmd_disable "$@" ;;
+    merge)              cmd_merge "$@" ;;
+    add)                cmd_add "$@" ;;
+    mcp)                cmd_mcp "$@" ;;
+    memory)             cmd_memory "$@" ;;
+    start|desktop)      cmd_start "$@" ;;
+    update)             cmd_update "$@" ;;
+    reset|uninstall)    cmd_reset "$@" ;;
+    *)                  usage; exit 1 ;;
+esac

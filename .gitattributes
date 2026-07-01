@@ -1,0 +1,17 @@
+# Normalize line endings
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+
+# Treat secret-shaped files as binary so they never render/diff (backstop; they
+# should never be committed at all).
+*.env    binary
+.env.*   binary
+secrets.json binary
+*.pem    binary
+*.key    binary
+
+# Linguist: keep the repo classified as its real languages, not vendored docs.
+docs/**      linguist-documentation
+*.md         linguist-detectable=false
+memory.seed/** linguist-vendored

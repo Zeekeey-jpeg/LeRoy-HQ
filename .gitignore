@@ -1,0 +1,67 @@
+# ── LeRoy-HQ .gitignore ─────────────────────────────────────────────
+# LeRoy-HQ is built by INCLUSION (only curated files are copied in), so this
+# is a belt-and-suspenders backstop. If any of these ever appear, they must
+# NEVER be committed. CI (gitleaks) is the final guard.
+
+# ===== SECRETS / CREDENTIALS (never, ever) =====
+*.env
+.env
+.env.*
+!*.env.example
+!.env.example
+*secret*
+*secrets.json
+.credentials.json
+.gauth.json
+.accounts.json
+.claude.json
+.claude.json.*
+auth_config.json
+*.pem
+*.key
+id_rsa*
+*.canvas_token
+**/.hq-secret-literals
+*token*
+!**/*token*.example
+
+# ===== PRIVATE / RUNTIME STATE (never publish) =====
+memory/
+!memory.seed/
+session/
+sessions/
+teams/
+backups/
+channels/
+telemetry/
+usage-data/
+projects/
+plugins/
+quarantine/
+cache/
+paste-cache/
+dist-hq/
+worktrees/
+
+# ===== USER-GENERATED (belongs to the end user, not the repo) =====
+~/.claude/
+*.local.json
+settings.local.json
+
+# ===== BUILD / DEPS / OS =====
+node_modules/
+dist/
+build/
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
+Thumbs.db
+*.log
+
+# ===== LARGE BINARIES =====
+*.rvt
+*.dwg
+*.zip
+*.mp4

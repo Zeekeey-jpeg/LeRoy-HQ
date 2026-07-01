@@ -1,0 +1,24 @@
+# MEMORY.md — The Index
+
+> This is LeRoy's memory index — one line per note, loaded into context every session so
+> LeRoy knows what it knows. It is **maintained automatically**: every time a note is written
+> to the vault, a one-line pointer is added here. You rarely edit this by hand.
+
+Each line looks like:
+
+```
+- [Short Title](Projects/some-note.md) — one-line hook of what's inside
+```
+
+The hook is what LeRoy scans to decide whether a note is relevant to your current request,
+then it opens the full file only if it is. Keep hooks short and specific.
+
+---
+
+## Notes
+
+<!-- LeRoy adds lines here as your memory grows. Starts empty on a fresh install. -->
+<!-- Example (delete once you have real notes):
+- [Product v2 launch](Projects/product-v2.md) — active build; target ship end of quarter
+- [Comms style](Feedback/comms-style.md) — prefers brief answers, confirm before sending
+-->
