@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    LeRoy CLI (Windows) — dispatches leroy subcommands.
+    LeRoy CLI (Windows) - dispatches leroy subcommands.
 
 .DESCRIPTION
     Single entrypoint for the LeRoy command surface:
@@ -22,7 +22,7 @@
     init / doctor / merge are fully wired. start / desktop are stubs that print
     what they will do.
 
-    Paths are always derived from $HOME\.claude — nothing is hardcoded.
+    Paths are always derived from $HOME\.claude - nothing is hardcoded.
 #>
 
 [CmdletBinding()]
@@ -113,7 +113,7 @@ function Cmd-Chat {
 
 function Cmd-Add {
     if (-not $Rest -or $Rest.Count -lt 1) {
-        Say "Usage: leroy add <boardroom|security>   (memory, mesh & gate are core — already installed)"
+        Say "Usage: leroy add <boardroom|security>   (memory, mesh & gate are core - already installed)"
         exit 1
     }
     $module = $Rest[0].ToLower()
@@ -122,7 +122,7 @@ function Cmd-Add {
         Say "Unknown module '$module'. Opt-in modules: boardroom, security. (memory, mesh, gate are core.)"
         exit 1
     }
-    # Each module ships its own installer — it handles auth-gates (security) and
+    # Each module ships its own installer - it handles auth-gates (security) and
     # opt-in / default-off wiring (boardroom). Fall back to an additive merge.
     $inst = Join-Path $modSrc "install.ps1"
     if (Test-Path $inst) { & $inst; exit $LASTEXITCODE }
@@ -133,7 +133,7 @@ function Cmd-Add {
 function Cmd-Mcp {
     if ($Rest -and $Rest[0] -eq "add") {
         $tmpl = Join-Path $RepoRoot (Join-Path "mcps" "_template")
-        Say "[stub] leroy mcp add — conversational connector builder."
+        Say "[stub] leroy mcp add - conversational connector builder."
         Say "Will scaffold from: $tmpl"
         Say "Then start a session and say e.g. 'talk to my Notion' to wire it."
         exit 0
@@ -160,7 +160,7 @@ function Cmd-Memory {
 
 function Cmd-Start {
     # Desktop app ships in v1.1; be clear rather than half-launch.
-    Say "The LeRoy desktop app is coming in a future release (v1.1) — it's not part of this build."
+    Say "The LeRoy desktop app is coming in a future release (v1.1) - it's not part of this build."
     Say "LeRoy v1 is CLI-first and fully complete. Run 'leroy' to start a session."
     exit 0
 }
@@ -169,7 +169,7 @@ function Cmd-Update {
     Push-Location $RepoRoot
     try {
         if (-not (Test-Path (Join-Path $RepoRoot ".git"))) {
-            Say "Not a git checkout — can't self-update. Re-clone to get the latest."
+            Say "Not a git checkout - can't self-update. Re-clone to get the latest."
             exit 1
         }
         # main is the only user-facing tracked branch (item 33). If a checkout
@@ -177,7 +177,7 @@ function Cmd-Update {
         # silently fast-forwarding whatever branch happens to be checked out.
         $branch = (git rev-parse --abbrev-ref HEAD).Trim()
         if ($branch -ne "main") {
-            Say "On branch '$branch', not 'main' — switching to 'main' before updating."
+            Say "On branch '$branch', not 'main' - switching to 'main' before updating."
             git checkout main
             if ($LASTEXITCODE -ne 0) {
                 Say "Could not switch to 'main' (uncommitted local changes?). Resolve manually, then re-run 'leroy update'."
@@ -187,7 +187,7 @@ function Cmd-Update {
         Say "Pulling upstream code (your memory vault is never touched)..."
         git pull --ff-only origin main
         if ($LASTEXITCODE -ne 0) {
-            Say "Update failed — pull was not fast-forward-only safe. Resolve manually (git status), then re-run."
+            Say "Update failed - pull was not fast-forward-only safe. Resolve manually (git status), then re-run."
             exit $LASTEXITCODE
         }
         Say "Re-running additive merge to apply any new core files..."

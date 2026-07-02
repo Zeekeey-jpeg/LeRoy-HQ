@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    LeRoy — shortcuts.ps1  (creates the two onboarding desktop shortcuts)
+    LeRoy - shortcuts.ps1  (creates the two onboarding desktop shortcuts)
 
 .DESCRIPTION
     Creates BOTH required Desktop shortcuts (item 12 / G2):
@@ -11,8 +11,8 @@
       2. "Leroy CLI"  -> opens a terminal, cd's into the user's ~\.claude, and
                          auto-runs the `leroy` CLI (Claude Code w/ LeRoy loaded).
 
-    All paths are bound PowerShell parameters — never f-string / string-eval
-    interpolation — so apostrophes, spaces, and other punctuation in usernames
+    All paths are bound PowerShell parameters - never f-string / string-eval
+    interpolation - so apostrophes, spaces, and other punctuation in usernames
     or install paths can't break the generated .lnk targets (WS5 polish item).
 
     Idempotent: re-running overwrites the two .lnk files cleanly.
@@ -52,7 +52,7 @@ $ErrorActionPreference = "Stop"
 function Say($t) { Write-Host "  $t" }
 
 if (-not (Test-Path $DesktopDir)) {
-    Say "Desktop folder not found at $DesktopDir — skipping shortcut creation."
+    Say "Desktop folder not found at $DesktopDir - skipping shortcut creation."
     Say "You can still launch LeRoy any time: open a terminal in $ClaudeHome and type 'leroy'."
     exit 0
 }
@@ -87,7 +87,7 @@ if ($DryRun) {
 
 $W = New-Object -ComObject WScript.Shell
 
-# --- "Leroy CLI" — terminal, cwd = ~/.claude, auto-runs `leroy` -------------
+# --- "Leroy CLI" - terminal, cwd = ~/.claude, auto-runs `leroy` -------------
 $psExe = Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe"
 $cli = $W.CreateShortcut($cliShortcut)
 $cli.TargetPath       = $psExe
@@ -98,14 +98,14 @@ $cli.Description      = "Open a terminal and start a LeRoy session"
 $cli.Save()
 Say "Created 'Leroy CLI' shortcut on your Desktop."
 
-# --- "Leroy" — web UI / desktop app -----------------------------------------
+# --- "Leroy" - web UI / desktop app -----------------------------------------
 $ui = $W.CreateShortcut($uiShortcut)
 if ($AppEntry -and (Test-Path $AppEntry)) {
     if ($AppEntry -like "*.exe") {
         $ui.TargetPath = $AppEntry
         $ui.WorkingDirectory = Split-Path -Parent $AppEntry
     } else {
-        # .cmd / .ps1 starter — launch via the interpreter, cwd at the app dir.
+        # .cmd / .ps1 starter - launch via the interpreter, cwd at the app dir.
         $ui.TargetPath = $psExe
         $ui.Arguments  = "-NoLogo -ExecutionPolicy Bypass -File `"$AppEntry`""
         $ui.WorkingDirectory = Split-Path -Parent $AppEntry
@@ -116,7 +116,7 @@ if ($AppEntry -and (Test-Path $AppEntry)) {
 } else {
     # No packaged app in this checkout yet. Ship a real, non-broken shortcut
     # that explains the situation rather than pointing at nothing (never a
-    # dead .lnk) — CLI-first is still fully functional via 'Leroy CLI'.
+    # dead .lnk) - CLI-first is still fully functional via 'Leroy CLI'.
     $notice = Join-Path $ClaudeHome "installer\_ui_not_packaged_notice.cmd"
     $noticeDir = Split-Path -Parent $notice
     New-Item -ItemType Directory -Force -Path $noticeDir | Out-Null
@@ -133,7 +133,7 @@ pause
     $ui.WorkingDirectory = $ClaudeHome
     $ui.Description      = "LeRoy desktop app (not yet packaged in this build)"
     $ui.Save()
-    Say "Created 'Leroy' shortcut on your Desktop (desktop app not packaged yet — shows a friendly notice; use 'Leroy CLI' for now)."
+    Say "Created 'Leroy' shortcut on your Desktop (desktop app not packaged yet - shows a friendly notice; use 'Leroy CLI' for now)."
 }
 
 Say "Both shortcuts are on your Desktop: 'Leroy' and 'Leroy CLI'."
