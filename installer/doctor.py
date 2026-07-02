@@ -24,6 +24,18 @@ import subprocess
 import sys
 from dataclasses import dataclass, field
 
+# Some Windows consoles are strict cp1252, not UTF-8. The _UTF_OK glyph probe
+# below only tests the glyphs it's given — any OTHER non-ASCII character used
+# later in the file (e.g. the U+21B3 arrow in a fix hint) can still slip past
+# it and crash with UnicodeEncodeError on print(). Reconfiguring stdout/stderr
+# to replace-on-error is a whole-class fix: any glyph degrades to '?' instead
+# of throwing, for every string, forever — belt-and-suspenders with _UTF_OK
+# below (which still picks the nicer ASCII fallback marks when it can).
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(errors="replace")
+
 # --- pretty output ----------------------------------------------------------
 # Fall back to ASCII marks if the terminal can't render check/cross glyphs.
 _UTF_OK = True
@@ -182,10 +194,33 @@ def print_report(report: DoctorReport) -> None:
         print("       Fix the items above, then re-run.\n")
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    import argparse
+    from pathlib import Path
+
+    parser = argparse.ArgumentParser(description="LeRoy doctor: prereq check, or --upgrade for an existing-install scan")
+    parser.add_argument("--upgrade", action="store_true",
+                         help="scan an existing ~/.claude vs the shipped core/ and report what's stale/new (WS3 G4)")
+    parser.add_argument("--existing", type=Path, default=None, help="with --upgrade: existing ~/.claude to inventory")
+    parser.add_argument("--from-archive", type=Path, default=None,
+                         help="with --upgrade: a .zip/.tar(.gz) of an existing install instead of a live dir")
+    args = parser.parse_args(argv)
+
     report = run_all()
     print_report(report)
-    return 0 if report.ok else 1
+    rc = 0 if report.ok else 1
+
+    if args.upgrade:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import inventory
+        inv_argv = []
+        if args.existing:
+            inv_argv += ["--existing", str(args.existing)]
+        if args.from_archive:
+            inv_argv += ["--from-archive", str(args.from_archive)]
+        inventory.main(inv_argv)
+
+    return rc
 
 
 if __name__ == "__main__":

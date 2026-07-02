@@ -9,6 +9,8 @@
 #   leroy add <module>  A la carte: memory | boardroom | mesh | gate | security
 #   leroy mcp add       Conversationally build a new connector
 #   leroy memory        Open the vault / show stats
+#   leroy backup        Back up ~/.claude (your remote if configured, else a local
+#                       zip) then auto-run housekeeping (log prune, RAG reindex)
 #   leroy start         Launch the desktop app (beta, desktop-only)
 #   leroy update        Pull upstream code (never touches your grown memory)
 #   leroy reset         Clean rollback (restores the pre-LeRoy backup)
@@ -84,6 +86,8 @@ cmd_init() {
 
 cmd_merge() { run_py merge.py "$@"; }
 
+cmd_backup() { run_py backup.py "$@"; }
+
 cmd_chat() {
     if ! command -v claude >/dev/null 2>&1; then
         say "Claude Code (claude) isn't on PATH. Run 'leroy doctor' for the install link."
@@ -136,10 +140,22 @@ cmd_start() {
 
 cmd_update() {
     [ -d "$REPO_ROOT/.git" ] || { say "Not a git checkout — re-clone to get the latest."; exit 1; }
-    ( cd "$REPO_ROOT" && say "Pulling upstream (your memory vault is never touched)..." && git pull --ff-only )
+    (
+        cd "$REPO_ROOT"
+        # main is the only user-facing tracked branch (item 33).
+        branch="$(git rev-parse --abbrev-ref HEAD)"
+        if [ "$branch" != "main" ]; then
+            say "On branch '$branch', not 'main' — switching to 'main' before updating."
+            git checkout main
+        fi
+        say "Pulling upstream (your memory vault is never touched)..."
+        git pull --ff-only origin main
+    )
     say "Re-running additive merge to apply any new core files..."
     run_py merge.py >/dev/null
-    say "Update complete."
+    say "Refreshing the RAG index with any memory notes added since last update..."
+    run_py memory_migrate.py >/dev/null
+    say "Update complete (main)."
 }
 
 cmd_reset() {
@@ -165,8 +181,8 @@ usage() {
     doctor      health check          add <m>    add a module
     enable <f>  turn on a feature     disable<f> turn off a feature
     mcp add     build a connector     memory     vault stats
-    start       desktop app (beta)    update     pull upstream
-    reset       restore pre-LeRoy backup
+    backup      back up + housekeeping start      desktop app (beta)
+    update      pull upstream          reset      restore pre-LeRoy backup
 
 EOF
 }
@@ -182,6 +198,7 @@ case "$COMMAND" in
     enable)             cmd_enable "$@" ;;
     disable)            cmd_disable "$@" ;;
     merge)              cmd_merge "$@" ;;
+    backup)             cmd_backup "$@" ;;
     add)                cmd_add "$@" ;;
     mcp)                cmd_mcp "$@" ;;
     memory)             cmd_memory "$@" ;;

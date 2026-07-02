@@ -13,6 +13,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/interface-CLI%20first-080a0d?style=for-the-badge&logo=gnubash&logoColor=white" />
+  <img src="https://img.shields.io/badge/platform-Windows-0078d6?style=for-the-badge&logo=windows&logoColor=white" />
   <img src="https://img.shields.io/badge/status-alpha-e09b2d?style=for-the-badge" />
   <img src="https://img.shields.io/badge/built%20on-Claude%20Code-2d6cdf?style=for-the-badge" />
   <img src="https://img.shields.io/badge/memory-Obsidian%20native-8a5cf6?style=for-the-badge" />
@@ -21,11 +22,11 @@
 </p>
 
 <p align="center">
-  <a href="#-choose-your-path">Quickstart</a> ·
+  <a href="#-choose-your-path">Install</a> ·
   <a href="#-the-org-chart--27-agents-5-tiers">Architecture</a> ·
   <a href="docs/">Docs</a> ·
   <a href="#-see-it-work">Demo</a> ·
-  <a href="#-follow-along">Community</a>
+  <a href="#-follow-along">Waitlist</a>
 </p>
 
 ---
@@ -67,6 +68,108 @@ your memory is **100% yours** — plain markdown on your disk.
 **1,063 gate checks logged at 100% compliance** is our eval story, not a slogan. And every
 run leaves a trail: a **gate log**, an **automation registry**, and a **decisions ledger** you
 can `grep` after the fact.
+
+---
+
+## 🚦 Choose your path
+
+> ### 👉 First — where do these commands go?
+> LeRoy runs on **[Claude Code](https://www.anthropic.com/claude-code)**, Anthropic's free
+> command-line tool. You type the commands below into your computer's **terminal** — **not** the
+> Claude desktop app and **not** the Claude website.
+> - **Windows:** click **Start**, type **PowerShell**, press Enter. That window is your terminal.
+>
+> Then paste the lines **one at a time**, pressing Enter after each. No coding required.
+
+### 🌱 New here (never touched a terminal — that's totally fine)
+You'll be talking to your AI company in about 15 minutes.
+
+**1. Open your terminal** — PowerShell on Windows (see the box above).
+**2. Run the one-liner** — this is the whole install:
+```powershell
+irm https://raw.githubusercontent.com/Zeekeey-jpeg/LeRoy-HQ/main/install.ps1 | iex
+```
+That single command checks for `git` (telling you plainly how to get it if it's missing),
+clones LeRoy into **`%USERPROFILE%\LeRoy-HQ`**, hands off to its own setup (which checks the
+rest of your prerequisites — Claude Code, Node, Python — creates your `.claude` folder, and
+merges LeRoy in), puts a **Leroy CLI** shortcut on your Desktop, and launches your first
+session automatically.
+
+**3. Say hi:**
+> **`hi, I'm new`**
+
+That greeting kicks off a short, friendly interview — LeRoy asks a few questions about you and
+your work and builds your memory (your profile, your projects, your people) as you answer. No
+jargon, nothing to memorize.
+
+**From here on, you don't run any commands — you use your shortcut.** Double-click
+**Leroy CLI** whenever you want to talk to LeRoy again.
+
+Stuck at any point? Type **`leroy doctor`** — it checks everything and tells you, in plain
+English, exactly how to fix whatever's missing. **`leroy reset`** undoes the whole install.
+
+### 🔁 Already comfortable in a terminal / already use Claude Code
+Adopt LeRoy **without losing your setup.** In your terminal:
+```powershell
+git clone https://github.com/Zeekeey-jpeg/LeRoy-HQ leroy
+cd leroy
+.\setup.ps1
+```
+If `setup` finds Claude Code content already in `~/.claude`, it stops and tells you plainly
+what it found and what LeRoy will do before touching anything — you choose to integrate in
+place or keep LeRoy separate. Once you say go, it backs your `.claude` up to
+`.claude.backup-<date>` and merges LeRoy in **additively** — hooks are appended, never
+overwritten, and your model choice and existing settings survive untouched. Run
+**`leroy doctor --upgrade`** any time to see exactly what's unchanged, what's stale (yours to
+review), what's yours-only (never touched), and what's newly added — including older
+tarball/zip setups via `--from-archive`.
+
+Add the opt-in modules when you want them:
+```bash
+leroy add boardroom     # or:  leroy add security   (auth-gated)
+```
+**Updating later:** `leroy update` pulls the latest release, diffs what's installed against
+what's shipped, and applies only the new or changed core pieces — additive, backup-first, and
+it **never touches your memory, config, shortcuts, or anything you've authored yourself.**
+
+**Want a ping when LeRoy ships something new?** Click **Watch → Custom → Releases only** on
+the [LeRoy-HQ repo](https://github.com/Zeekeey-jpeg/LeRoy-HQ) — zero setup on our end, opt-in,
+turn it off the same way anytime.
+
+<details>
+<summary><b>🧠 Expert / builder — bend it to your will</b></summary>
+
+<br/>
+
+- Read `docs/architecture.md` + `docs/hidden-features.md` — the gate, hooks, A2A mesh, self-heal.
+- Read `docs/scaling.md` — the tier system, topology selection, mesh hop limits, and the CTO flight plan.
+- Scaffold your own: the `agent-creator` / `skill-creator` skills generate new agents & skills; `leroy mcp add` builds connectors on demand.
+- Cherry-pick modules; enable the auth-gated `security` module (`leroy add security`).
+- Contribute agents / skills / connectors back — see `CONTRIBUTING.md`.
+
+</details>
+
+> **Requires:** a Claude subscription (heavy/autonomous use → Max tier). Node 18+, Python 3.11+,
+> and git — `leroy doctor` verifies all of this for you. **Windows-only today**; macOS/Linux
+> are on the roadmap, not shipped.
+>
+> **Recommended model:** **Claude Sonnet** — the best balance of speed, cost, and capability
+> for day-to-day LeRoy use. Switch anytime in Claude Code (`/model`); the boardroom can still
+> pin high-stakes calls to a top-tier model when it matters.
+>
+> **No login, no account needed — LeRoy runs entirely on your machine.** There's no cloud
+> service and nothing to sign into: it's local-to-local by design, and you talk to it through
+> the CLI. If you ever expose anything beyond your own machine (e.g. Tailscale Funnel), read
+> the warning in `AUTH-SETUP.md` first — it is not designed for open internet exposure.
+
+### 💳 Which Claude plan?
+LeRoy runs on a **Claude subscription** — interactive, hands-on use is comfortable on
+**Pro**. For the autonomous features (**especially the boardroom**, which can run around the
+clock), we recommend **Claude Max (~$100/mo)** so background work doesn't crowd out your own.
+
+**No local model required.** Everything runs on your Claude plan out of the box. A local model
+(e.g. [Ollama](https://ollama.com)) is **optional** — add one and LeRoy will offload cheap
+background work to it for free; skip it and nothing breaks, it just all runs on Claude.
 
 ---
 
@@ -159,82 +262,6 @@ Real jobs LeRoy runs, start to finish:
   explaining what it did.
 - **"Should we take this on?"** → the boardroom convenes, five personas debate it, you get a
   verdict — and the reasoning is logged to memory forever.
-
----
-
-## 🚦 Choose your path
-
-> ### 👉 First — where do these commands go?
-> LeRoy runs on **[Claude Code](https://www.anthropic.com/claude-code)**, Anthropic's free
-> command-line tool. You type the commands below into your computer's **terminal** — **not** the
-> Claude desktop app and **not** the Claude website.
-> - **Windows:** click **Start**, type **PowerShell**, press Enter. That window is your terminal.
-> - **macOS:** press **⌘ + Space**, type **Terminal**, press Enter.
->
-> Then paste the lines **one at a time**, pressing Enter after each. No coding required.
-
-### 🌱 New here (never touched a terminal — that's totally fine)
-You'll be talking to your AI company in about 15 minutes.
-
-**1. Install Claude Code** — one installer: **https://www.anthropic.com/claude-code**
-**2. Open your terminal** — PowerShell on Windows, Terminal on macOS (see the box above).
-**3. Get LeRoy** — paste these one at a time:
-```bash
-git clone https://github.com/Zeekeey-jpeg/LeRoy-HQ leroy
-cd leroy
-.\setup.ps1          # Windows.   On macOS/Linux instead run:   ./setup
-```
-**4. Meet LeRoy** — it runs a friendly interview and builds your memory:
-```bash
-leroy init
-```
-**5. Start talking:**
-```bash
-leroy
-```
-Stuck at any point? Type **`leroy doctor`** — it checks everything and tells you, in plain
-English, exactly how to fix whatever's missing. **`leroy reset`** undoes the whole install.
-During setup LeRoy can also add a **desktop shortcut**, so next time you just **double-click**
-to launch it — no terminal needed.
-
-### 🔁 Already comfortable in a terminal / already use Claude Code
-Adopt LeRoy **without losing your setup.** In your terminal:
-```bash
-git clone https://github.com/Zeekeey-jpeg/LeRoy-HQ leroy
-cd leroy
-.\setup.ps1          # Windows   (macOS/Linux:  ./setup)
-```
-`setup` detects your existing `~/.claude`, backs it up, and merges LeRoy in **additively** — your
-skills and settings are preserved. Add the opt-in modules when you want them:
-```bash
-leroy add boardroom     # or:  leroy add security   (auth-gated)
-```
-`leroy update` later pulls improvements and **never touches your memory.**
-
-<details>
-<summary><b>🧠 Expert / builder — bend it to your will</b></summary>
-
-<br/>
-
-- Read `docs/architecture.md` + `docs/hidden-features.md` — the gate, hooks, A2A mesh, self-heal.
-- Read `docs/scaling.md` — the tier system, topology selection, mesh hop limits, and the CTO flight plan.
-- Scaffold your own: the `agent-creator` / `skill-creator` skills generate new agents & skills; `leroy mcp add` builds connectors on demand.
-- Cherry-pick modules; enable the auth-gated `security` module (`leroy add security`).
-- Contribute agents / skills / connectors back — see `CONTRIBUTING.md`.
-
-</details>
-
-> **Requires:** a Claude subscription. Node 18+, Python 3.11+, git.
-> **Windows-first today**; macOS/Linux in progress.
-
-### 💳 Which Claude plan?
-LeRoy runs on a **Claude subscription** — interactive, hands-on use is comfortable on
-**Pro**. For the autonomous features (**especially the boardroom**, which can run around the
-clock), we recommend **Claude Max (~$100/mo)** so background work doesn't crowd out your own.
-
-**No local model required.** Everything runs on your Claude plan out of the box. A local model
-(e.g. [Ollama](https://ollama.com)) is **optional** — add one and LeRoy will offload cheap
-background work to it for free; skip it and nothing breaks, it just all runs on Claude.
 
 ---
 
@@ -335,11 +362,13 @@ turns instead of drifting — and every gate emission is written to the **gate l
 
 ---
 
-## 🖥️ The desktop app (coming in v1.1)
-A visual companion is in the works — a 3D globe of your sessions, a kanban triage board, the
-live boardroom, an inbox, and drag-and-drop document RAG. It's **not in this release**: LeRoy
-v1 is **CLI-first and fully complete on the command line.** `leroy start` will launch the app
-once it lands.
+## 🚧 The desktop app — unlocks at 5,000 stars
+A visual companion is built — a 3D globe of your sessions, a kanban triage board, the live
+boardroom, an inbox, and drag-and-drop document RAG. It's **not part of this release**: LeRoy
+v1 is **CLI-first and fully complete on the command line**, and the desktop app unlocks once
+the project hits **5,000 GitHub stars** — a real signal that enough people are relying on the
+CLI product to be worth supporting a second surface well, rather than shipping it half-baked
+alongside the launch. Star the repo to help get there and get pinged the moment it unlocks.
 
 ---
 
@@ -366,9 +395,9 @@ touching *your* grown memory — code and brain are separate layers.
 | Boardroom + governor + local-model routing | ✅ |
 | MCP builder (build connectors by asking) | ✅ |
 | Self-healing auto-fix / janitor / wake-coalescer | ✅ |
-| Voice: input (Whisper) + write-in-your-voice compose | ✅ (text-out only) |
+| Voice: input (Wispr Flow) + write-in-your-voice compose | ✅ (text-out only) |
 | `security` module (authorized-testing arsenal) | ✅ opt-in, auth-gated |
-| Desktop visual app (globe, kanban, boardroom) | 🟡 In development — CLI-first for v1 |
+| Desktop visual app (globe, kanban, boardroom) | 🔒 Built, locked — unlocks at 5,000 GitHub stars |
 | Self-learning loop (auto-*adopt* new skills) | 🟡 Alpha — observes today |
 | Typed memory edges (supersedes/contradicts) | 🟡 Roadmap (entity graph in RAG today) |
 | One-command installer + cross-platform (mac/Linux) | 🟡 In progress (Windows-first) |
@@ -382,14 +411,21 @@ touching *your* grown memory — code and brain are separate layers.
 - [ ] Close the self-learning loop (observe → propose → validate → adopt)
 - [ ] Skill & MCP sharing hub
 - [ ] Boardroom auto-invoke on consequential decisions
-- [ ] Desktop visual app (globe · kanban · boardroom · doc-RAG) — v1.1
+- [ ] Desktop visual app (globe · kanban · boardroom · doc-RAG) — unlocks at 5,000 ⭐ stars
 
 ---
 
 ## ⭐ Follow along
-Star the repo — LeRoy ships constantly. Want release pings? [Join the list](#).
+Star the repo — LeRoy ships constantly.
 
-<p align="center"><sub>MIT · Made with Claude</sub></p>
+**Want early access and release pings?** [**Join the waitlist →**](https://github.com/Zeekeey-jpeg/LeRoy-HQ/issues/new?template=waitlist.yml&title=Waitlist%3A+%40your-username&labels=waitlist)
+
+That link opens a one-field GitHub issue. If you're signed in to GitHub, your username comes
+along automatically — that's all we need to add you. No GitHub account? Email
+**[bscott@helpmebim.com](mailto:bscott@helpmebim.com?subject=LeRoy%20waitlist)** and we'll add
+you.
+
+<p align="center"><sub>Built by <a href="https://helpmebim.com">HelpMeBIM</a> · MIT · Made with Claude</sub></p>
 <p align="center">
   <img src="https://capsule-render.vercel.app/api?type=waving&color=0:080a0d,100:2d6cdf&height=100&section=footer" />
 </p>

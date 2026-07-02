@@ -25,6 +25,15 @@ import json
 import sys
 from pathlib import Path
 
+# See installer/doctor.py for why this exists: a glyph-probe fallback alone
+# can miss a non-ASCII character that only appears later in the file,
+# crashing print() on a strict cp1252 console. Reconfiguring is the
+# whole-class fix.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(errors="replace")
+
 _UTF_OK = True
 try:
     "✅⚪🔴".encode(sys.stdout.encoding or "utf-8")
@@ -78,9 +87,19 @@ def wire_feature(key: str, dest: Path) -> None:
         #   draft-gated by the gmail guard).
         print(f"    (stub) would schedule email digests (outbound stays draft-gated)")
     elif key == "scheduled_automations":
-        # TODO(wiring): CronCreate the selected background jobs (self-heal timer,
-        #   backup, watchdog).
-        print(f"    (stub) would register the background crons (self-heal timer, backup, watchdog)")
+        # Nightly housekeeping (item 39 rev, mechanism b) is the one piece of
+        # this bucket that's fully wired today: register_task.py creates an
+        # opt-in Task Scheduler entry pointing at core/scripts/maintenance.py
+        # (housekeeping only — no push, no commit, no token spend). Self-heal
+        # timer / watchdog remain stubs until those features land.
+        try:
+            sys.path.insert(0, str(Path(__file__).resolve().parent))
+            import register_task
+            ok, msg = register_task.register()
+            print(f"    {'[OK]' if ok else '[!!]'} nightly housekeeping: {msg}")
+        except Exception as exc:  # noqa: BLE001 - never let a wiring stub crash `leroy enable`
+            print(f"    (couldn't register nightly housekeeping: {exc})")
+        print(f"    (stub) would also register: self-heal timer, watchdog")
     else:
         # On-by-default features are already active; nothing to schedule.
         print(f"    (nothing to schedule for '{key}')")
@@ -88,7 +107,15 @@ def wire_feature(key: str, dest: Path) -> None:
 
 def unwire_feature(key: str, dest: Path) -> None:
     """Turn a feature OFF in the real system (unschedule / remove)."""
-    if key in {"boardroom", "morning_briefing", "email_digests", "scheduled_automations"}:
+    if key == "scheduled_automations":
+        try:
+            sys.path.insert(0, str(Path(__file__).resolve().parent))
+            import register_task
+            ok, msg = register_task.unregister()
+            print(f"    {'[OK]' if ok else '[!!]'} nightly housekeeping: {msg}")
+        except Exception as exc:  # noqa: BLE001 - never let a wiring stub crash `leroy disable`
+            print(f"    (couldn't unregister nightly housekeeping: {exc})")
+    elif key in {"boardroom", "morning_briefing", "email_digests"}:
         # TODO(wiring): CronDelete the job(s) registered for this feature.
         print(f"    (stub) would unschedule the cron(s) for '{key}'")
     else:

@@ -32,6 +32,15 @@ import shutil
 import sys
 from pathlib import Path
 
+# See installer/doctor.py for why this exists: a glyph-probe fallback alone
+# can miss a non-ASCII character that only appears later in the file,
+# crashing print() on a strict cp1252 console. Reconfiguring is the
+# whole-class fix.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(errors="replace")
+
 # --- pretty marks (ASCII fallback) ------------------------------------------
 _UTF_OK = True
 try:

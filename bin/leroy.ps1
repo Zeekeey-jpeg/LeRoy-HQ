@@ -13,6 +13,8 @@
         leroy add <module>  Opt-in module: boardroom | security  (memory/mesh/gate are core)
         leroy mcp add       Conversationally build a new connector
         leroy memory        Open the vault / show stats
+        leroy backup        Back up ~/.claude (your remote if configured, else a local
+                             zip) then auto-run housekeeping (log prune, RAG reindex)
         leroy start         Launch the desktop app (beta, desktop-only)
         leroy update        Pull upstream code (never touches your grown memory)
         leroy reset         Clean rollback (restores the pre-LeRoy backup)
@@ -95,6 +97,8 @@ function Cmd-Init {
 
 function Cmd-Merge { exit (Invoke-Py "merge.py" $Rest) }
 
+function Cmd-Backup { exit (Invoke-Py "backup.py" $Rest) }
+
 function Cmd-Chat {
     $claude = Get-Command "claude" -ErrorAction SilentlyContinue
     if (-not $claude) {
@@ -168,11 +172,29 @@ function Cmd-Update {
             Say "Not a git checkout — can't self-update. Re-clone to get the latest."
             exit 1
         }
+        # main is the only user-facing tracked branch (item 33). If a checkout
+        # somehow ended up elsewhere, switch back before pulling rather than
+        # silently fast-forwarding whatever branch happens to be checked out.
+        $branch = (git rev-parse --abbrev-ref HEAD).Trim()
+        if ($branch -ne "main") {
+            Say "On branch '$branch', not 'main' — switching to 'main' before updating."
+            git checkout main
+            if ($LASTEXITCODE -ne 0) {
+                Say "Could not switch to 'main' (uncommitted local changes?). Resolve manually, then re-run 'leroy update'."
+                exit $LASTEXITCODE
+            }
+        }
         Say "Pulling upstream code (your memory vault is never touched)..."
-        git pull --ff-only
+        git pull --ff-only origin main
+        if ($LASTEXITCODE -ne 0) {
+            Say "Update failed — pull was not fast-forward-only safe. Resolve manually (git status), then re-run."
+            exit $LASTEXITCODE
+        }
         Say "Re-running additive merge to apply any new core files..."
         Invoke-Py "merge.py" @() | Out-Null
-        Say "Update complete."
+        Say "Refreshing the RAG index with any memory notes added since last update..."
+        Invoke-Py "memory_migrate.py" @() | Out-Null
+        Say "Update complete (main)."
         exit 0
     } finally { Pop-Location }
 }
@@ -208,6 +230,7 @@ switch ($Command.ToLower()) {
     "enable"    { Cmd-Enable }
     "disable"   { Cmd-Disable }
     "merge"     { Cmd-Merge }
+    "backup"    { Cmd-Backup }
     "add"       { Cmd-Add }
     "mcp"       { Cmd-Mcp }
     "memory"    { Cmd-Memory }
@@ -223,8 +246,8 @@ switch ($Command.ToLower()) {
         Write-Host "    doctor      health check          add <m>    add a module"
         Write-Host "    enable <f>  turn on a feature     disable<f> turn off a feature"
         Write-Host "    mcp add     build a connector     memory     vault stats"
-        Write-Host "    start       desktop app (beta)    update     pull upstream"
-        Write-Host "    reset       restore pre-LeRoy backup"
+        Write-Host "    backup      back up + housekeeping start      desktop app (beta)"
+        Write-Host "    update      pull upstream          reset      restore pre-LeRoy backup"
         Write-Host ""
         exit 1
     }

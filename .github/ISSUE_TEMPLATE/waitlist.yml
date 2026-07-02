@@ -1,0 +1,53 @@
+# GitHub Issue Form — LeRoy waitlist
+# Install path in the public repo: .github/ISSUE_TEMPLATE/waitlist.yml
+# When a signed-in GitHub user opens this, their username is auto-captured as the
+# issue author (github.event.issue.user.login) — no field needed to collect it.
+# The "labels" key auto-applies the waitlist label so Brian can filter/notify.
+# Brian is notified by GitHub email if he watches the repo or is assigned.
+name: Join the waitlist
+description: Get on the LeRoy early-access list and release pings.
+title: "Waitlist: @your-username"
+labels: ["waitlist"]
+assignees:
+  - Zeekeey-jpeg
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Welcome to the LeRoy waitlist 👋
+        You're signed in to GitHub, so **we already have your username** — that's all we need to add you.
+        The two fields below are optional; hit **Submit new issue** and you're on the list.
+
+  - type: input
+    id: use-case
+    attributes:
+      label: What do you want to use LeRoy for? (optional)
+      description: One line helps us prioritize. Totally fine to leave blank.
+      placeholder: e.g. "solo consultant, want the memory + boardroom"
+    validations:
+      required: false
+
+  - type: input
+    id: contact-email
+    attributes:
+      label: Email for release pings (optional)
+      description: Only if you'd rather be pinged by email than by GitHub notification.
+      placeholder: you@example.com
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: platform
+    attributes:
+      label: Platform
+      description: LeRoy is Windows-only today. Check the box so we know to ping you if/when your platform lands.
+      options:
+        - label: I'm on Windows (supported today)
+        - label: I'm on macOS (roadmap — ping me when it's ready)
+        - label: I'm on Linux (roadmap — ping me when it's ready)
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        **No GitHub account?** Email **bscott@helpmebim.com** with the subject "LeRoy waitlist" instead.

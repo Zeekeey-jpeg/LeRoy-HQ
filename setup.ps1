@@ -3,8 +3,8 @@
     LeRoy — setup.ps1  (Windows bootstrap)
 
 .DESCRIPTION
-    The one command that turns your Claude Code into LeRoy. Runs the six steps
-    from onboarding-and-install.md:
+    The one command that turns your Claude Code into LeRoy. Runs the eight
+    steps from onboarding-and-install.md:
 
       1. Preflight (doctor.py) — check Claude Code / Node 18+ / Python 3.11+ / git,
          printing a clean fix for every miss.
@@ -12,8 +12,11 @@
          (never clobbers your settings; hooks are appended).
       3. Install Python deps (from requirements.txt if present).
       4. Register the `leroy` command on PATH (per-user).
-      5. Launch the interview -> leroy init.
-      6. Print a friendly "you're live" card.
+      5. Create both Desktop shortcuts — "Leroy" (UI) + "Leroy CLI" (terminal).
+      6. Index memory\ into the RAG sidecar (existing-user upgrades keep their
+         vault; this only builds a derived index, never touches the vault).
+      7. Launch the interview -> leroy init.
+      8. Print a friendly "you're live" card.
 
     Every path derives from $HOME\.claude — nothing is hardcoded.
     No secrets are read or written by this script.
@@ -26,7 +29,8 @@
 [CmdletBinding()]
 param(
     [switch]$SkipInit,
-    [switch]$SkipDeps
+    [switch]$SkipDeps,
+    [switch]$SkipShortcuts
 )
 
 $ErrorActionPreference = "Stop"
@@ -52,7 +56,7 @@ Write-Host "  Installing LeRoy — your AI company, in your terminal." -Foregrou
 Write-Host "  Repo: $RepoRoot"
 
 # --- Step 1: preflight ------------------------------------------------------
-Section "1/6  Preflight check"
+Section "1/8  Preflight check"
 $py = Get-Python
 if (-not $py) {
     Say "Python 3.11+ is required and wasn't found on PATH."
@@ -66,7 +70,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # --- Step 2: backup + additive merge ---------------------------------------
-Section "2/6  Merge LeRoy into ~\.claude (backup first)"
+Section "2/8  Merge LeRoy into ~\.claude (backup first)"
 if (Test-Path $ClaudeHome) {
     Say "Existing ~\.claude detected — it will be backed up before any change."
 } else {
@@ -75,8 +79,13 @@ if (Test-Path $ClaudeHome) {
 & $py (Join-Path $Installer "merge.py")
 if ($LASTEXITCODE -ne 0) { Say "Merge failed. Nothing was overwritten (backup is intact)."; exit $LASTEXITCODE }
 
+# Record where this checkout lives so future lookups (e.g. a scheduled
+# maintenance task, or `leroy backup` run from a different cwd) can find the
+# repo without guessing (WS4.1 user-finding protocol).
+& $py -c "import sys; sys.path.insert(0, r'$Installer'); import find_user; from pathlib import Path; find_user.write_repo_pointer(Path(r'$ClaudeHome'), Path(r'$RepoRoot'))"
+
 # --- Step 3: python deps ----------------------------------------------------
-Section "3/6  Install Python dependencies"
+Section "3/8  Install Python dependencies"
 $req = Join-Path $RepoRoot "requirements.txt"
 if ($SkipDeps) {
     Say "Skipped (--SkipDeps)."
@@ -89,7 +98,7 @@ if ($SkipDeps) {
 }
 
 # --- Step 4: register `leroy` on PATH --------------------------------------
-Section "4/6  Register the 'leroy' command"
+Section "4/8  Register the 'leroy' command"
 # Create a tiny shim in a user-local bin dir and add it to the user PATH.
 $UserBin = Join-Path $HOME ".local\bin"
 New-Item -ItemType Directory -Force -Path $UserBin | Out-Null
@@ -117,16 +126,41 @@ if ($userPath -notlike "*$UserBin*") {
 }
 Say "Registered: leroy -> $LeroyPs1"
 
-# --- Step 5: the interview --------------------------------------------------
-Section "5/6  Get-to-know-you interview"
+# --- Step 5: desktop shortcuts ----------------------------------------------
+Section "5/8  Desktop shortcuts"
+if ($SkipShortcuts) {
+    Say "Skipped (--SkipShortcuts)."
+} else {
+    $ShortcutsScript = Join-Path $Installer "shortcuts.ps1"
+    if (Test-Path $ShortcutsScript) {
+        & powershell -NoProfile -ExecutionPolicy Bypass -File $ShortcutsScript -ClaudeHome $ClaudeHome -RepoRoot $RepoRoot
+    } else {
+        Say "installer\shortcuts.ps1 not found — skipping shortcut creation."
+    }
+}
+
+# --- Step 6: memory -> RAG integration --------------------------------------
+Section "6/8  Memory + RAG integration"
+$MemMigrate = Join-Path $Installer "memory_migrate.py"
+if (Test-Path $MemMigrate) {
+    & $py $MemMigrate
+    if ($LASTEXITCODE -ne 0) {
+        Say "(RAG indexing didn't complete — your memory vault is untouched. Re-run 'python installer\memory_migrate.py' once the RAG sidecar is up.)"
+    }
+} else {
+    Say "installer\memory_migrate.py not found — skipping RAG indexing."
+}
+
+# --- Step 7: the interview --------------------------------------------------
+Section "7/8  Get-to-know-you interview"
 if ($SkipInit) {
     Say "Skipped (--SkipInit). Run 'leroy init' whenever you're ready."
 } else {
     & $py (Join-Path $Installer "wizard.py")
 }
 
-# --- Step 6: you're live ----------------------------------------------------
-Section "6/6  You're live"
+# --- Step 8: you're live ----------------------------------------------------
+Section "8/8  You're live"
 Write-Host ""
 Write-Host "  +--------------------------------------------------------------+" -ForegroundColor Green
 Write-Host "  |  LeRoy is installed. Welcome aboard.                         |" -ForegroundColor Green
@@ -140,5 +174,6 @@ Write-Host "  |   Undo everything ....... leroy reset                        |" 
 Write-Host "  |                                                              |" -ForegroundColor Green
 Write-Host "  |  Your memory lives at ~\.claude\memory\                      |" -ForegroundColor Green
 Write-Host "  |  (Open a NEW terminal so 'leroy' is on your PATH.)           |" -ForegroundColor Green
+Write-Host "  |  From here on, use your 'Leroy CLI' Desktop shortcut.        |" -ForegroundColor Green
 Write-Host "  +--------------------------------------------------------------+" -ForegroundColor Green
 Write-Host ""

@@ -17,7 +17,9 @@ sensible default and moves on.
   Phase 4 — How you like things done -> seeds Feedback/
   Phase 5 — Autonomy menu -> a la carte, DEFAULT OFF, writes config/autonomy.json
   Phase 6 — Subscription  -> plain-English guidance (Pro vs Max; no local model needed)
-  Phase 7 — Shortcut      -> optional double-click desktop launcher (Windows-first)
+  Phase 7 — Shortcuts     -> status check only; installer\shortcuts.ps1 (run
+                             earlier by setup.ps1) is the sole creator of the
+                             "Leroy" + "Leroy CLI" Desktop shortcut pair
 
 Autonomy philosophy: ship the working car. Good non-burning features are ON by
 default; token-burning / autonomous features are OFF by default and offered one
@@ -39,10 +41,17 @@ import datetime as _dt
 import json
 import os
 import re
-import shutil
-import subprocess
 import sys
 from pathlib import Path
+
+# See installer/doctor.py for why this exists: a glyph-probe fallback alone
+# can miss a non-ASCII character (bullets, em-dashes, etc.) that only appears
+# later in the file, crashing print() on a strict cp1252 console. Reconfiguring
+# is the whole-class fix.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(errors="replace")
 
 _UTF_OK = True
 try:
@@ -535,94 +544,44 @@ def phase6_subscription(autonomy: dict) -> None:
 
 def phase7_shortcut(dest: Path) -> None:
     """
-    Offer a double-click launcher. Windows-first via WScript.Shell (.lnk).
-    Skippable. macOS/Linux left as a clear TODO.
+    Desktop shortcut status check — NOT creation.
+
+    installer\\shortcuts.ps1 (called from setup.ps1 step 5, BEFORE this
+    interview ever starts) is now the single, authoritative owner of Desktop
+    shortcut creation, producing exactly one pair: "Leroy" (UI) + "Leroy CLI"
+    (terminal) — the pair items 12/35 require.
+
+    This phase used to ALSO create its own differently-named pair
+    ("LeRoy.lnk" + "LeRoy Folder.lnk") as a WS2.5 nicety. That was removed
+    (WS6 stress test, 2026-07-01): Windows filenames are case-insensitive, so
+    "LeRoy.lnk" from this phase and "Leroy.lnk" from shortcuts.ps1 are THE
+    SAME FILE on disk — running this after shortcuts.ps1 silently overwrote
+    the real "Leroy" (UI) shortcut with a plain terminal launcher, leaving the
+    user with LeRoy(terminal) + LeRoy Folder(explorer) + Leroy CLI instead of
+    the required Leroy(UI) + Leroy CLI pair. Two shortcut-creation code paths
+    for the same Desktop is a correctness bug waiting to happen, not a
+    feature — so this phase no longer creates anything. It only reports.
     """
     print("\n" + "=" * 60)
-    print("  Phase 7 — Desktop shortcut (optional)")
+    print("  Phase 7 — Desktop shortcuts")
     print("=" * 60)
 
-    if not ask_yes("Want a double-click shortcut to launch LeRoy?", default=False):
-        print("    (skipped — you can always launch with `leroy` from a terminal)")
+    desktop = Path(os.path.join(os.path.expanduser("~"), "Desktop"))
+    have_ui = (desktop / "Leroy.lnk").exists()
+    have_cli = (desktop / "Leroy CLI.lnk").exists()
+
+    if have_ui and have_cli:
+        print("    Found 'Leroy' and 'Leroy CLI' on your Desktop (created during install).")
         return
 
     if sys.platform.startswith("win"):
-        _make_windows_shortcuts(dest)
+        print("    Didn't find both Desktop shortcuts (Leroy + Leroy CLI).")
+        print("    Re-run installer\\shortcuts.ps1 any time to (re)create them:")
+        print(f"      powershell -File shortcuts.ps1 -ClaudeHome \"{dest}\"")
     else:
-        # TODO(macOS/Linux): write a ~/.local/share/applications/leroy.desktop
-        # entry (Linux) or an AppleScript .app / `alias leroy` shim (macOS).
         print("    Double-click shortcuts are Windows-only in this build.")
         print("    On macOS/Linux, add a shell alias instead, e.g.:")
         print("      echo 'alias leroy=\"cd ~/.claude && leroy\"' >> ~/.zshrc")
-        print("    (macOS .app / Linux .desktop launchers: TODO.)")
-
-
-def _make_windows_shortcuts(dest: Path) -> None:
-    """
-    Create two Desktop .lnk files via PowerShell + WScript.Shell:
-      1) 'LeRoy' — opens a terminal in ~/.claude and runs the LeRoy CLI.
-      2) 'LeRoy Folder' — opens the ~/.claude folder in Explorer.
-    Best-effort: if PowerShell isn't available we explain and move on.
-    """
-    desktop = Path(os.path.join(os.path.expanduser("~"), "Desktop"))
-    if not desktop.exists():
-        print(f"    (couldn't find your Desktop at {desktop} — skipping shortcuts)")
-        return
-
-    launcher = desktop / "LeRoy.lnk"
-    folder = desktop / "LeRoy Folder.lnk"
-    claude_home = str(dest)
-
-    pwsh = shutil.which("powershell") or shutil.which("pwsh")
-    if not pwsh:
-        print("    (PowerShell not found — can't create the .lnk shortcuts.)")
-        print(f"    Launch manually anytime: open a terminal in {claude_home} and type `leroy`.")
-        return
-
-    # Build the shortcuts via a small PowerShell script. We pass all paths as
-    # PS variables (not string-interpolated into the middle of quoted args) so
-    # spaces and quoting can't break. The launcher starts PowerShell with its
-    # WorkingDirectory = ~/.claude and runs `leroy`; -NoExit keeps the window open.
-    # leroy.ps1 auto-loads because the shell starts in ~/.claude.
-    # NOTE: use $ClaudeDir, never $HOME — $HOME is a read-only automatic variable.
-    ps_script = f"""
-$ErrorActionPreference = 'Stop'
-$ClaudeDir = '{claude_home}'
-$launcher  = '{launcher}'
-$folder    = '{folder}'
-$W = New-Object -ComObject WScript.Shell
-
-$s = $W.CreateShortcut($launcher)
-$s.TargetPath       = (Join-Path $env:SystemRoot 'System32\\WindowsPowerShell\\v1.0\\powershell.exe')
-$s.Arguments        = '-NoExit -NoLogo -Command leroy'
-$s.WorkingDirectory = $ClaudeDir
-$s.IconLocation     = 'powershell.exe,0'
-$s.Description       = 'Launch a LeRoy session'
-$s.Save()
-
-$f = $W.CreateShortcut($folder)
-$f.TargetPath       = (Join-Path $env:SystemRoot 'explorer.exe')
-$f.Arguments        = $ClaudeDir
-$f.WorkingDirectory = $ClaudeDir
-$f.Description       = 'Open your LeRoy folder'
-$f.Save()
-"""
-
-    try:
-        subprocess.run(
-            [pwsh, "-NoProfile", "-NonInteractive", "-Command", ps_script],
-            capture_output=True,
-            text=True,
-            timeout=30,
-            check=True,
-        )
-    except (subprocess.SubprocessError, OSError) as exc:
-        print(f"    (couldn't create shortcuts automatically: {exc})")
-        print(f"    Launch manually: open a terminal in {claude_home} and type `leroy`.")
-        return
-
-    print(f"    {OK} Created a 'LeRoy' shortcut on your Desktop (double-click to start).")
-    print(f"    {OK} Created a 'LeRoy Folder' shortcut to open {claude_home}.")
 
 
 def close(name: str) -> None:
