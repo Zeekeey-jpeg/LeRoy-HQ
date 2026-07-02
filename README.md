@@ -71,12 +71,11 @@ You'll be talking to your AI company in about 15 minutes. No coding required.
 5. Follow the prompts.
 6. **BAM — that's it.**
 
-The installer handles everything, puts a **Leroy CLI** shortcut on your Desktop, and launches
-your first session. Onboarding starts on its own — LeRoy asks a few questions about you and
-your work, and builds your memory as you answer.
-
-**From here on, you don't run any commands — you use your shortcut.** Double-click
-**Leroy CLI** whenever you want to talk to LeRoy again.
+**📌 Note:** the installer handles everything, and onboarding starts on its own — LeRoy asks
+a few questions about you and your work and builds your memory as you answer. When it's done,
+you'll see a **Leroy CLI** shortcut on your Desktop. From then on you never run commands
+again — the next time you want to use LeRoy, just double-click that shortcut. And you're not
+limited to one session: open as many as you want, whenever you want.
 
 Stuck at any point? Type **`leroy doctor`** — it checks everything and tells you, in plain
 English, exactly how to fix whatever's missing. **`leroy reset`** undoes the whole install.
