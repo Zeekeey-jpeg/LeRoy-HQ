@@ -31,20 +31,20 @@
 
 ---
 
-## What is LeRoy?
+## What is LeRoy, actually?
 
-**LeRoy turns your Claude Code into a self-growing AI *company* that runs under you — from the command line.**
+Think about hiring a real team. The first few months are the expensive part — they're
+learning how you like things done, your clients, your writing voice, your shortcuts.
+Eventually they just *know*, and you stop having to explain yourself every time.
 
-Not a chatbot. Not a folder of agent prompts. A whole org — a chief-of-staff, a C-suite,
-and a bench of specialists — on a **shared, permanent memory** that learns how *you* work
-and gets sharper every day.
+**LeRoy is that team, already past the first few months, dropped into your machine in one
+install.** You point Claude Code at it, and instead of a blank chat window that forgets you
+the second the session ends, you get a staff: a chief-of-staff who triages what you throw at
+it, specialists who actually do the work, and a memory that never resets — from message one.
 
-You talk to it like a team. It routes each request to the right "employee," remembers every
-decision, debates the big calls in a boardroom, grows its own skills as it watches you — and
-it does the plumbing (memory, routing, cost control) invisibly.
-
-> **One-liner:** *You know how, if you hired a team, after a few months they'd just know how
-> you like things done? LeRoy is that — as software. An AI company that learns you.*
+It's not a chatbot and it's not a folder of prompts. It's the difference between handing
+someone a stack of sticky notes and handing them a company that already knows how to run
+itself.
 
 ```console
 $ leroy
@@ -53,6 +53,37 @@ you › draft the follow-up to yesterday's proposal
 ◆ [COO] routing → builder + voice-compose · recalling 4 related notes…
 ◆ done. draft written in your voice, parked in Drafts. logged to memory.
 ```
+
+### 🤔 Why would you actually download this?
+
+- You already pay for Claude Code, but every session starts from zero — you re-explain
+  context, re-paste files, re-teach it your preferences, every single time. **LeRoy remembers,
+  permanently, across every session, with no extra step from you.**
+- Building an agent org chart, a shared memory, a routing layer, and safety rails yourself is
+  months of work most people never get around to finishing. **LeRoy is that months of work,
+  already built, installed in about 15 minutes.**
+- You don't want to learn "prompt engineering." You want to talk to it like a person and have
+  the right thing happen — it figures out who on the "team" should handle it.
+
+### 🎯 What does it actually do for you?
+
+| You say or do this… | …LeRoy does this | …so you get |
+|---|---|---|
+| "Draft the follow-up to yesterday's proposal" | Routes it to the right specialist, recalls the actual thread from memory, writes it in your voice | A finished draft, not a blank page — no re-explaining the deal |
+| Nothing — it's 2am and a build breaks | Notices, fixes it in an isolated branch, verifies the fix, rolls back if it made things worse | You wake up to a working system and a note explaining what happened |
+| "Should we take this deal / hire / feature on?" | Convenes a debate between five perspectives (act-now, long-view, what-breaks, people, structure) and logs a verdict | A real decision with the reasoning saved — not a vibe you'll forget you had |
+| Literally anything, on day 200 | It already remembers your last 199 conversations | It gets *better* the longer you use it, not slower or staler |
+
+### 🆚 Why this instead of just using Claude Code as-is?
+
+Vanilla Claude Code is a very capable employee with amnesia — sharp in the room, forgets you
+the moment the session ends. LeRoy is the *organization* around that employee: the memory, the
+division of labor, the guardrails — everything a real company builds over months, pre-built
+and running in about 15 minutes. One download, and you skip straight to the part where it
+already knows how you work. **That's the whole pitch.**
+
+<p align="right"><i>Curious how it actually works under the hood — the agents, the memory,
+the guardrails? Keep reading below.</i></p>
 
 ---
 
