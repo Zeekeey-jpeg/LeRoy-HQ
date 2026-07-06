@@ -24,63 +24,42 @@
 <p align="center">
   <a href="#-choose-your-path">Install</a> ·
   <a href="#-the-org-chart--27-agents-5-tiers">Architecture</a> ·
-  <a href="docs/">Docs</a> ·
-  <a href="#-see-it-work">Demo</a> ·
-  <a href="#-follow-along">Waitlist</a>
+  <a href="docs/">Docs</a>
 </p>
 
 ---
 
 ## What is LeRoy, actually?
 
-Think about hiring a real team. The first few months are the expensive part — they're
-learning how you like things done, your clients, your writing voice, your shortcuts.
-Eventually they just *know*, and you stop having to explain yourself every time.
+LeRoy is an **AI orchestration layer** that turns Claude Code into a usable AI division —
+a whole organization of specialists sharing one memory, instead of a chat window that
+forgets you the moment the session ends.
 
-**LeRoy is that team, already past the first few months, dropped into your machine in one
-install.** You point Claude Code at it, and instead of a blank chat window that forgets you
-the second the session ends, you get a staff: a chief-of-staff who triages what you throw at
-it, specialists who actually do the work, and a memory that never resets — from message one.
-
-It's not a chatbot and it's not a folder of prompts. It's the difference between handing
-someone a stack of sticky notes and handing them a company that already knows how to run
-itself.
-
-```console
-$ leroy
-◆ LeRoy online — 27 agents, memory warm.
-you › draft the follow-up to yesterday's proposal
-◆ [COO] routing → builder + voice-compose · recalling 4 related notes…
-◆ done. draft written in your voice, parked in Drafts. logged to memory.
-```
+Think about hiring a real team: the first few months are the expensive part, while they
+learn how you like things done. **LeRoy is that team already past onboarding** — installed
+in about 15 minutes, it gives you a chief-of-staff who routes what you throw at it,
+specialists who do the work, and a memory that never resets.
 
 ### 🤔 Why would you actually download this?
 
-- You already pay for Claude Code, but every session starts from zero — you re-explain
-  context, re-paste files, re-teach it your preferences, every single time. **LeRoy remembers,
-  permanently, across every session, with no extra step from you.**
-- Building an agent org chart, a shared memory, a routing layer, and safety rails yourself is
-  months of work most people never get around to finishing. **LeRoy is that months of work,
-  already built, installed in about 15 minutes.**
-- You don't want to learn "prompt engineering." You want to talk to it like a person and have
-  the right thing happen — it figures out who on the "team" should handle it.
+Every Claude Code session normally starts from zero — you re-explain context, re-paste
+files, re-teach it your preferences, every time. LeRoy remembers permanently, across every
+session, and skips the months of work (org chart, routing, memory, guardrails) that building
+this yourself would take.
 
 ### 🎯 What does it actually do for you?
 
-| You say or do this… | …LeRoy does this | …so you get |
+| You say... | ...LeRoy does this | ...so you get |
 |---|---|---|
 | "Draft the follow-up to yesterday's proposal" | Routes it to the right specialist, recalls the actual thread from memory, writes it in your voice | A finished draft, not a blank page — no re-explaining the deal |
-| Nothing — it's 2am and a build breaks | Notices, fixes it in an isolated branch, verifies the fix, rolls back if it made things worse | You wake up to a working system and a note explaining what happened |
 | "Should we take this deal / hire / feature on?" | Convenes a debate between five perspectives (act-now, long-view, what-breaks, people, structure) and logs a verdict | A real decision with the reasoning saved — not a vibe you'll forget you had |
-| Literally anything, on day 200 | It already remembers your last 199 conversations | It gets *better* the longer you use it, not slower or staler |
 
 ### 🆚 Why this instead of just using Claude Code as-is?
 
-Vanilla Claude Code is a very capable employee with amnesia — sharp in the room, forgets you
-the moment the session ends. LeRoy is the *organization* around that employee: the memory, the
-division of labor, the guardrails — everything a real company builds over months, pre-built
-and running in about 15 minutes. One download, and you skip straight to the part where it
-already knows how you work. **That's the whole pitch.**
+Vanilla Claude Code is a capable employee with amnesia — sharp in the room, forgets you the
+moment the session ends. LeRoy is the organization built around that employee: the memory,
+the division of labor, the guardrails — the stuff a real company builds over months,
+pre-built and running in 15 minutes. **That's the whole pitch.**
 
 <p align="right"><i>Curious how it actually works under the hood — the agents, the memory,
 the guardrails? Keep reading below.</i></p>
@@ -114,48 +93,19 @@ your work, and builds your memory as you answer.
 Stuck at any point? Type **`leroy doctor`** — it checks everything and tells you, in plain
 English, exactly how to fix whatever's missing. **`leroy reset`** undoes the whole install.
 
-### 🔁 Already comfortable in a terminal / already use Claude Code
-Adopt LeRoy **without losing your setup.** In your terminal (these clone into your home
-folder, so they work no matter what directory your terminal opens in — a plain PowerShell
-often starts in `C:\WINDOWS\system32`, which you can't write to):
+### 🔁 Already using Claude Code / comfortable in a terminal
+Adopt LeRoy without losing your existing setup:
 ```powershell
 git clone https://github.com/Zeekeey-jpeg/LeRoy-HQ "$HOME\LeRoy-HQ"
 cd "$HOME\LeRoy-HQ"
 .\setup.ps1
 ```
-If `setup` finds Claude Code content already in `~/.claude`, it stops and tells you plainly
-what it found and what LeRoy will do before touching anything — you choose to integrate in
-place or keep LeRoy separate. Once you say go, it backs your `.claude` up to
-`.claude.backup-<date>` and merges LeRoy in **additively** — hooks are appended, never
-overwritten, and your model choice and existing settings survive untouched. Run
-**`leroy doctor --upgrade`** any time to see exactly what's unchanged, what's stale (yours to
-review), what's yours-only (never touched), and what's newly added — including older
-tarball/zip setups via `--from-archive`.
+If you already have Claude Code content in `~/.claude`, setup backs it up automatically and
+merges LeRoy in additively — nothing of yours gets overwritten.
 
-Add the opt-in modules when you want them:
 ```bash
-leroy add boardroom     # or:  leroy add security   (auth-gated)
+leroy add boardroom     # optional modules, add anytime
 ```
-**Updating later:** `leroy update` pulls the latest release, diffs what's installed against
-what's shipped, and applies only the new or changed core pieces — additive, backup-first, and
-it **never touches your memory, config, shortcuts, or anything you've authored yourself.**
-
-**Want a ping when LeRoy ships something new?** Click **Watch → Custom → Releases only** on
-the [LeRoy-HQ repo](https://github.com/Zeekeey-jpeg/LeRoy-HQ) — zero setup on our end, opt-in,
-turn it off the same way anytime.
-
-<details>
-<summary><b>🧠 Expert / builder — bend it to your will</b></summary>
-
-<br/>
-
-- Read `docs/architecture.md` + `docs/hidden-features.md` — the gate, hooks, A2A mesh, self-heal.
-- Read `docs/scaling.md` — the tier system, topology selection, mesh hop limits, and the CTO flight plan.
-- Scaffold your own: the `agent-creator` / `skill-creator` skills generate new agents & skills; `leroy mcp add` builds connectors on demand.
-- Cherry-pick modules; enable the auth-gated `security` module (`leroy add security`).
-- Contribute agents / skills / connectors back — see `CONTRIBUTING.md`.
-
-</details>
 
 **Requires:** a Claude subscription (heavy/autonomous use → Max tier). Node 18+, Python 3.11+,
 and git — `leroy doctor` verifies all of this for you. **Windows-only today**; macOS/Linux
@@ -170,67 +120,39 @@ service and nothing to sign into: it's local-to-local by design, and you talk to
 the CLI. If you ever expose anything beyond your own machine (e.g. Tailscale Funnel), read
 the warning in `AUTH-SETUP.md` first — it is not designed for open internet exposure.
 
-### 💳 Which Claude plan?
-LeRoy runs on a **Claude subscription** — interactive, hands-on use is comfortable on
-**Pro**. For the autonomous features (**especially the boardroom**, which can run around the
-clock), we recommend **Claude Max (~$100/mo)** so background work doesn't crowd out your own.
-
-**No local model required.** Everything runs on your Claude plan out of the box. A local model
-(e.g. [Ollama](https://ollama.com)) is **optional** — add one and LeRoy will offload cheap
-background work to it for free; skip it and nothing breaks, it just all runs on Claude.
-
 ---
 
-### 🕐 Recent
-- **2026-07-01** — Doc-RAG ingestion pipeline shipped: drop in a PDF/DOCX, chat over it now, remembered forever.
-- **2026-07-01** — Scaling protocol documented ([docs/scaling.md](docs/scaling.md)) — tiers, topology, A2A mesh, CTO flight plans.
-- **2026-07-01** — MCP-builder + `_template/` published — LeRoy builds its own connectors on demand.
-
 ### By the numbers
-**1,063** gate checks at **100%** compliance in daily use · warm recall **3251ms → 1622ms** ·
-A2A mesh **2–10×** speedup on parallel work · **27** agents across **5** governed tiers ·
-your memory is **100% yours** — plain markdown on your disk.
-
-**Tested + audited:** a dedicated `simulator` agent runs the protocol-compliance harness —
-**1,063 gate checks logged at 100% compliance** is our eval story, not a slogan. And every
-run leaves a trail: a **gate log**, an **automation registry**, and a **decisions ledger** you
-can `grep` after the fact.
+**27** agents across **5** governed tiers · **1,063** gate checks at **100%** compliance ·
+warm recall **3251ms → 1622ms** · A2A mesh **2–10×** speedup · memory is **100% yours**,
+plain markdown on your disk.
 
 ---
 
 ## 🏆 Why this isn't "another pile of agents"
 
 Anyone can drop 30 agent prompts in a folder — that's the slop. LeRoy is a **system with a
-control plane.** The value is the connective tissue *between* the agents:
+control plane.** A couple of the differences that actually matter:
 
 | Everyone has… | **LeRoy has instead…** |
 |---|---|
 | A bag of agents you wire yourself | A **governed org chart** — one router, 5 tiers, enforced tool-access |
-| Tools you call by name | Skills that are **predicted for you**, not memorized |
 | A vector store you dump text into | A memory that **forgets the right things** (confidence decay) |
-| "Save to memory" buttons | **Zero-effort capture** — every conversation auto-distilled & embedded |
-| One model, one opinion | A **boardroom** that debates consequential calls before you commit |
-| Vibes-based behavior | A **deterministic pre-flight** before every turn (recall → route → act) |
-| Bit-rot as it grows | It **heals and cleans itself** — audit → fix → verify → rollback |
 
 **The tell for a technical reader:** LeRoy is *deterministic* (a mandatory gate guarantees
-recall + routing every turn — 1,063 logged at 100% compliance), *governed* (agents have a
-tool-access matrix — the C-suite literally can't write to disk), and *self-repairing* (a
-tiered auto-fix engine edits code in isolated git worktrees and rolls back on failure). Every
-safety rail traces to a real past incident, with the post-mortem in the docstring. That's an
-operating system, not a prompt dump.
+recall + routing every turn), *governed* (agents have a tool-access matrix — the C-suite
+literally can't write to disk), and *self-repairing* (a tiered auto-fix engine edits code in
+isolated git worktrees and rolls back on failure). Every safety rail traces to a real past
+incident. That's an operating system, not a prompt dump.
 
 ---
 
 ## 🔬 A reasoning layer on top of the model
 
-LeRoy doesn't just *run on* a reasoning model — it adds a second layer of **algorithmic
-instinct** on top, without slowing the machine down. Before it closes a fix, it reflexively
-asks: *is this isolated or systemic? what else shares this code or data? does the fix cover
-every instance of the problem, not just the one you named?* A defect report can't shortcut to
-a knee-jerk single-file change — it's classified first (**root cause → blast radius → cheapest
-confirming check**). Fast, but never tunnel-visioned: it fixes the *class* of problem, not just
-the instance in front of it.
+LeRoy adds a second layer of **algorithmic instinct** on top of the model — before it closes
+a fix, it asks *is this isolated or systemic, and does the fix cover every instance of the
+problem, not just the one you named?* It fixes the *class* of problem, not just the instance
+in front of it.
 
 ## 🧠 Agents that compound — and a COO that connects the dots
 
@@ -271,22 +193,6 @@ leroy enable <feature>     # e.g. leroy enable boardroom
 
 **Bottom line:** everything that makes LeRoy smart works out of the box; everything that runs
 *without you in the loop* stays dark until you flip it on.
-
----
-
-## 🎬 See it work
-
-<p align="center"><i>route a request → boardroom debate → it remembers forever</i></p>
-
-Real jobs LeRoy runs, start to finish:
-
-- **"Draft the follow-up to yesterday's proposal."** → routes to the builder, recalls the thread
-  from memory, writes it *in your voice*, and parks it in your drafts.
-- **Overnight, unprompted:** a build breaks → LeRoy audits itself, fixes it in an isolated branch,
-  verifies, and rolls back if it made things worse — you wake up to a green system and a note
-  explaining what it did.
-- **"Should we take this on?"** → the boardroom convenes, five personas debate it, you get a
-  verdict — and the reasoning is logged to memory forever.
 
 ---
 
@@ -387,40 +293,22 @@ A human-readable vault on **your** disk (browse it, `grep` it, own it).
   re-confirmed, so old guesses don't rot recall.
 - **Doc-RAG firewall** — drop in a PDF/DOCX; raw source is retrievable on demand but kept out
   of default recall so summaries surface first.
-- **Warm sidecar** — a local RAG service (numpy fast-path, rerank, knowledge-graph) serves
-  recall in milliseconds. Ships as Python you can read.
-
-**The ingestion pipeline:** every document and conversation flows through one line —
+- **Warm sidecar** — a local RAG service serves recall in milliseconds, ships as Python you
+  can read.
 
 ```
 capture → distill → chunk → embed → graph
 ```
 
-capture the raw text → distill it to what matters → chunk for retrieval → embed each chunk →
-link it into the knowledge graph. That's how a dropped PDF becomes something LeRoy can reason
-over minutes later.
+> **See your brain** — point [Obsidian](https://obsidian.md) at `~/.claude/memory` and open
+> **Graph View** to watch your second brain grow: every `[[wiki-link]]` LeRoy writes becomes
+> an edge. Plain markdown, no export, no lock-in. *(Obsidian is free.)*
 
-> **📊 See your brain — it's an [Obsidian](https://obsidian.md) vault.** Point Obsidian at
-> `~/.claude/memory` and open **Graph View** to watch your second brain grow: every `[[wiki-link]]`
-> LeRoy writes becomes an edge, every auto-tag a cluster. Your memories, visualized — no export, no
-> lock-in. It's plain markdown, so any Markdown tool works too. *(Obsidian is free.)*
-
-### Memory backends — pluggable
-LeRoy works **out of the box** with its plain-file Obsidian vault + local RAG sidecar — no
-database, no cloud, nothing to set up. But memory is a **pluggable backend.** If you'd rather
-back your recall with an external store, plug one in via `leroy mcp add` — e.g. **Neo4j** or
-**pgvector**. The vault stays the source of
-truth on your disk; the external store becomes an additional recall layer. Optional, one command,
-swap it any time.
-
-## 🏛️ The Boardroom
+## 🏛️ The Boardroom *(optional — off by default)*
 Consequential decisions convene a council — General (act now), Sage (5-yr), Skeptic (what
 breaks), Diplomat (people), Architect (structure) — plus an Inquisitor. It votes and logs the
-verdict. If you run a local model, LeRoy routes ~65% of the low-stakes turns to it for free
-and pins only the high-stakes calls to the top model; **without one, everything runs on your
-Claude plan** — a 24/7 boardroom will use tokens, which is exactly why it's **opt-in** (see
-["Autonomy is opt-in"](#-autonomy-is-opt-in-the-working-car)). A governor caps spend either
-way to protect a flat plan.
+verdict. It's **opt-in** (`leroy add boardroom`) because a 24/7 boardroom uses tokens; a
+governor caps spend either way to protect a flat plan.
 
 ## 🔧 It runs — and repairs — itself
 - **Self-healing auto-fix:** audit → fix → verify → **auto-rollback**, in tiers (safe fixes
@@ -453,52 +341,6 @@ never enter the repo. LeRoy doesn't phone home. `leroy update` pulls *our* code 
 touching *your* grown memory — code and brain are separate layers.
 
 ---
-
-## 📊 Status — honest edition
-
-<details>
-<summary><b>See the full subsystem status table</b></summary>
-
-<br/>
-
-| Subsystem | State |
-|---|---|
-| COO routing + 5-tier mesh + A2A + soft-interrupts | ✅ |
-| Deterministic gate (Position Zero) | ✅ |
-| Self-growing memory (vault + RAG + decay + doc firewall) | ✅ |
-| Skill library + predictive router | ✅ |
-| Boardroom + governor + local-model routing | ✅ |
-| MCP builder (build connectors by asking) | ✅ |
-| Self-healing auto-fix / janitor / wake-coalescer | ✅ |
-| Voice: input (Wispr Flow) + write-in-your-voice compose | ✅ (text-out only) |
-| `security` module (authorized-testing arsenal) | ✅ opt-in, auth-gated |
-| Desktop visual app (globe, kanban, boardroom) | 🔒 Built, locked — unlocks at 5,000 GitHub stars |
-| Self-learning loop (auto-*adopt* new skills) | 🟡 Alpha — observes today |
-| Typed memory edges (supersedes/contradicts) | 🟡 Roadmap (entity graph in RAG today) |
-| One-command installer + cross-platform (mac/Linux) | 🟡 In progress (Windows-first) |
-
-</details>
-
----
-
-## 🗺️ Roadmap
-- [ ] Cross-platform one-command installer + `leroy init` wizard
-- [ ] Close the self-learning loop (observe → propose → validate → adopt)
-- [ ] Skill & MCP sharing hub
-- [ ] Boardroom auto-invoke on consequential decisions
-- [ ] Desktop visual app (globe · kanban · boardroom · doc-RAG) — unlocks at 5,000 ⭐ stars
-
----
-
-## ⭐ Follow along
-Star the repo — LeRoy ships constantly.
-
-**Want early access and release pings?** [**Join the waitlist →**](https://github.com/Zeekeey-jpeg/LeRoy-HQ/issues/new?template=waitlist.yml&title=Waitlist%3A+%40your-username&labels=waitlist)
-
-That link opens a one-field GitHub issue. If you're signed in to GitHub, your username comes
-along automatically — that's all we need to add you. No GitHub account? Email
-**[bscott@helpmebim.com](mailto:bscott@helpmebim.com?subject=LeRoy%20waitlist)** and we'll add
-you.
 
 <p align="center"><sub>Built by <a href="https://helpmebim.com">HelpMeBIM</a> · MIT · Made with Claude</sub></p>
 <p align="center">
