@@ -5,15 +5,15 @@ session-resume-preflight.py -- UserPromptSubmit hook.
 Detects when a session is being RESUMED after a long idle gap (default 3h)
 and injects a preflight directive.
 
-WHY: A long-open / resumed session silently degrades -- MCP connections drop,
-fallback tools route around the guard hooks, and injected context goes stale.
-In one incident a ~24h-resumed session sent an unbranded email (the primary
-mail MCP was down -> an unguarded fallback path was used) and answered from a
-stale ledger. This preflight forces a re-verify before any outbound action.
+WHY: A long-open / resumed session silently degrades -- MCP connections
+(esp. google-YourCo) drop, fallback tools route around the guard hooks, and the
+injected context anchor goes stale. On 2026-06-29 a ~24h-resumed session sent
+an unbranded client email (google-YourCo down -> claude.ai Gmail fallback, which
+at the time bypassed every guard) and answered from a stale invoice ledger.
 
 This hook does NOT block and cannot itself reach the MCP layer. On a stale
 resume it tells Claude to:
-  1. Re-verify MCP health (esp. the mail/outbound server) BEFORE any outbound action.
+  1. Re-verify MCP health (esp. google-YourCo) BEFORE any outbound action.
   2. Reload the outbound + memory protocols before acting.
   3. Treat the injected context anchor / recalled status as possibly stale
      and sanity-check status data against live sources.
@@ -42,13 +42,14 @@ def _banner(gap_hours: float) -> str:
         f"    [STALE-SESSION RESUME] Idle ~{hrs} since last activity -- run PREFLIGHT first\n"
         "================================================================================\n"
         "    A long-open session degrades silently. BEFORE acting on this prompt:\n"
-        "    1. VERIFY MCP HEALTH -- esp. your mail/outbound server. If an outbound/\n"
-        "       email/calendar/drive action is involved, confirm the server is actually\n"
-        "       connected. Do NOT silently fall back to an unguarded tool and call it 'sent'.\n"
+        "    1. VERIFY MCP HEALTH -- esp. google-YourCo. If an outbound/email/calendar/\n"
+        "       drive action is involved, confirm the server is actually connected.\n"
+        "       Do NOT silently fall back to an unguarded tool and call it 'sent'.\n"
         "    2. RELOAD PROTOCOLS before outbound or memory work:\n"
-        "       - Outbound email -> your outbound/branding protocol (branded HTML).\n"
+        "       - Outbound email -> skills/integrations/gmail-send-protocol.md\n"
+        "                          + skills/user/YourCo-brand-assets.md (branded HTML).\n"
         "       - Memory/status   -> sanity-check ledgers/status against live source\n"
-        "                          before reporting.\n"
+        "                          (e.g. Gmail payment confirmations) before reporting.\n"
         "    3. The injected context anchor / recalled notes may be STALE -- verify\n"
         "       any file/flag/status they name still reflects reality.\n"
         "================================================================================\n"

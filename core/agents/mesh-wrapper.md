@@ -6,7 +6,7 @@ version: "3.1"
 tier_threshold: 1
 ---
 
-# Agent Mesh Wrapper v3.0 (A2A-Enhanced)
+# Agent Mesh Wrapper v3.1 (A2A-Enhanced + Persistent IMPACT)
 
 ## Purpose
 Enable lateral agent communication with full A2A protocol semantics — for **all tier levels**.
@@ -20,17 +20,18 @@ Enable lateral agent communication with full A2A protocol semantics — for **al
 **Original innovation preserved:** Agents communicate directly without orchestrator bottleneck, achieving 2-10x speedup on large tasks through parallel execution and knowledge sharing.
 
 ## When to Use
-- **AUTO-ENABLED (Tier-2+):** Tasks with 2+ packets — full mesh with heartbeats
-- **ON-DEMAND (Tier-1):** Single-packet tasks use A2A lightweight mode (DELEGATE, SUBSCRIBE, CACHE) without full mesh infrastructure
+- **AUTO-ENABLED (Tier-2+):** Tasks with 2+ packets — full mesh with heartbeats (lowered from 4 on 2026-04-18 for instrumentation experiment; graduate to always-on if overhead <2% weekly tokens)
+- **ON-DEMAND (Tier-1):** Single-packet tasks use A2A lightweight mode (DELEGATE, SUBSCRIBE, CACHE, IMPACT) without full mesh infrastructure
 - Parallel feature work across multiple agents
 - Knowledge sharing between agents (dependencies, conflicts, optimizations, learned selectors)
 - Direct task delegation without conductor round-trip
-- Event-driven pipelines (forge notifies a peer when a batch is ready)
+- Event-driven pipelines (forge notifies auditor when batch ready)
 
-**Why All Tiers:**
-- A2A DELEGATE/CACHE messages are lightweight — no heartbeat overhead needed
-- A single agent needing peer validation mid-work shouldn't require a Tier-2 mesh spin-up
+**Why Now All Tiers:**
+- A2A DELEGATE/CACHE/IMPACT messages are lightweight — no heartbeat overhead needed
+- Single agent needing auditor validation mid-work shouldn't require Tier-2 mesh spin-up
 - Full mesh (heartbeats, state.json, rate limiting) still only activates at Tier-2+
+- **IMPACT specifically must work at Tier-1** (v3.1 correction, 2026-07-01): the Root-Cause Classification Gate (`agents/conductor.md`) that emits most IMPACTs fires on single-item defect reports — by definition usually 1-packet tasks. If IMPACT required full mesh, it would never fire for the exact scenario it was built to cover.
 
 ## Protocol
 
@@ -38,15 +39,20 @@ Enable lateral agent communication with full A2A protocol semantics — for **al
 From packet assignment:
 - Count total packets
 - If `packets >= 2` → Enable **full mesh mode** (heartbeats, state.json, rate limiting)
-- If `packets < 2` → Enable **A2A lightweight mode** (DELEGATE/SUBSCRIBE/CACHE only, no heartbeats)
+- If `packets < 2` → Enable **A2A lightweight mode** (DELEGATE/SUBSCRIBE/CACHE/IMPACT only, no heartbeats)
 
 ```python
 def get_mesh_mode(packet_count):
-    """Determine mesh activation level based on packet count."""
+    """Determine mesh activation level based on packet count.
+
+    Threshold lowered 4 → 2 on 2026-04-18 (Debate by Brian verdict).
+    Experiment: log heartbeat I/O for 10 Tier-2 runs, graduate to
+    always-on if cost stays under 2% of weekly tokens.
+    """
     if packet_count >= 2:
         return "full"        # Heartbeats, state.json, full rate limiting
     else:
-        return "a2a_lite"    # DELEGATE/SUBSCRIBE/CACHE only, no overhead
+        return "a2a_lite"    # DELEGATE/SUBSCRIBE/CACHE/IMPACT only, no overhead
 ```
 
 ### Step 2: Agent Registration
@@ -61,7 +67,7 @@ Write to `mesh-state.json`:
 ```json
 {
   "active_agents": {
-    "builder-001-a4f2": {
+    "techy-001-a4f2": {
       "type": "builder",
       "status": "active",
       "tier": 2,
@@ -143,8 +149,8 @@ Send messages to `mesh-messages.jsonl` (append-only log):
 ```json
 {
   "timestamp": "2026-01-18T14:35:22.450Z",
-  "from": "builder-001-a4f2",
-  "to": "builder-002-b7e9",
+  "from": "techy-001-a4f2",
+  "to": "techy-002-b7e9",
   "priority": "HIGH",
   "type": "UPDATE",
   "payload": {
@@ -154,8 +160,8 @@ Send messages to `mesh-messages.jsonl` (append-only log):
     "files_modified": ["src/App.tsx", "package.json"]
   },
   "version_vector": {
-    "builder-001-a4f2": 5,
-    "builder-002-b7e9": 3
+    "techy-001-a4f2": 5,
+    "techy-002-b7e9": 3
   }
 }
 ```
@@ -173,35 +179,35 @@ Send messages to `mesh-messages.jsonl` (append-only log):
 - `CACHE`: Broadcast learned data (selectors, schemas, patterns) to all peers — ephemeral, session-only
 
 **Persistent Cross-Agent Memory type (v3.1):**
-- `IMPACT`: Any agent flags a change that plausibly affects another agent's domain. Always routed through the conductor, which persists it to both a COO-level impact ledger and the affected agents' own journals — this is the ONLY message type that survives past session end and compounds across spawns. See IMPACT receiver protocol below.
+- `IMPACT`: Any agent flags a change that plausibly affects another agent's domain. Always routed through conductor, which persists it to both a COO-level impact ledger and the affected agents' own journals — this is the ONLY message type that survives past session end and compounds across spawns. See IMPACT receiver protocol below.
 
-**Soft Interrupt type (Interrupts):**
-- `INTERRUPT`: Out-of-band signal that rides into the session via `session/interrupts.queue`. Any agent can fire one; the session's PostToolUse hook (`hooks/post-tool-handler.py`) drains the queue between tool calls and surfaces MEDIUM+ payloads as `[SOFT INTERRUPT]` system-reminders. **Does NOT hard-cancel anything in flight.** A session `/reset` remains the nuclear option.
+**Soft Interrupt type (v6.1 — Interrupts-B):**
+- `INTERRUPT`: Out-of-band signal that rides into Claude's session via `session/interrupts.queue`. Any agent can fire one; the session's PostToolUse hook (`hooks/post-tool-handler.py`) drains the queue between tool calls and surfaces MEDIUM+ payloads as `[SOFT INTERRUPT]` system-reminders. **Does NOT hard-cancel anything in flight.** Telegram `/reset` remains the nuclear option.
 
 **A2A Message Examples:**
 
 ```json
-// DELEGATE — builder tasks guardian directly
+// DELEGATE — builder tasks auditor directly
 {
   "timestamp": "2026-04-16T14:35:22.450Z",
   "from": "builder-001-a4f2",
-  "to": "guardian-001-b7e9",
+  "to": "auditor-001-b7e9",
   "priority": "HIGH",
   "type": "DELEGATE",
   "payload": {
-    "capability": "scope-check",
-    "input": { "changeset_id": "cs-12345" },
+    "capability": "bom-validation",
+    "input": { "opportunity_id": "CW-12345" },
     "callback_token": "abc123",
     "timeout_ms": 5000
   },
   "version_vector": { "builder-001-a4f2": 3 }
 }
 
-// SUBSCRIBE — forge wants to know when guardian finishes validation
+// SUBSCRIBE — forge wants to know when auditor finishes validation
 {
   "timestamp": "2026-04-16T14:35:25.000Z",
   "from": "forge-001-c9d4",
-  "to": "guardian-001-b7e9",
+  "to": "auditor-001-b7e9",
   "priority": "MEDIUM",
   "type": "SUBSCRIBE",
   "payload": {
@@ -212,10 +218,10 @@ Send messages to `mesh-messages.jsonl` (append-only log):
   "version_vector": { "forge-001-c9d4": 1 }
 }
 
-// NOTIFY — guardian fires event to forge subscriber
+// NOTIFY — auditor fires event to forge subscriber
 {
   "timestamp": "2026-04-16T14:36:01.000Z",
-  "from": "guardian-001-b7e9",
+  "from": "auditor-001-b7e9",
   "to": "forge-001-c9d4",
   "priority": "HIGH",
   "type": "NOTIFY",
@@ -224,7 +230,7 @@ Send messages to `mesh-messages.jsonl` (append-only log):
     "event": "validation_complete",
     "result": { "status": "VALID", "records_validated": 1247 }
   },
-  "version_vector": { "guardian-001-b7e9": 7 }
+  "version_vector": { "auditor-001-b7e9": 7 }
 }
 
 // CACHE — scraper broadcasts learned selectors to all peers
@@ -235,7 +241,7 @@ Send messages to `mesh-messages.jsonl` (append-only log):
   "priority": "LOW",
   "type": "CACHE",
   "payload": {
-    "key": "site-selectors:example.com",
+    "key": "vendor-portal-selectors:grainger.com",
     "value": {
       "price": ".price-box .amount",
       "sku": "#productId",
@@ -257,93 +263,105 @@ Send messages to `mesh-messages.jsonl` (append-only log):
   "priority": "MEDIUM",
   "type": "IMPACT",
   "payload": {
-    "changed_domain": "Client A/engagement-scope",
-    "change_summary": "Retainer scope amended to add a recurring audit deliverable — was one-time only",
-    "likely_affected_agents": ["legal", "proposal-writer"],
+    "changed_domain": "ExampleClient/Legal",
+    "change_summary": "Retainer scope amended to include quarterly BIM audits — was training-only",
+    "likely_affected_agents": ["legal", "auditor", "proposal-writer"],
     "confidence": 0.8,
     "source_event": "timeline_update"
   },
   "version_vector": { "secretary-001-d3f8": 4 }
 }
 
-// INTERRUPT — a peer signals conductor about a CRITICAL contradiction
+// INTERRUPT — auditor signals conductor about a CRITICAL contradiction (v6.1)
 // The mesh receiver MUST append this to session/interrupts.queue as JSONL.
 // PostToolUse hook (post-tool-handler.py) drains the queue between tool calls.
 {
   "timestamp": "2026-04-29T15:30:00.000Z",
-  "from": "scout-001-b7e9",
+  "from": "auditor-001-b7e9",
   "to": "conductor-session",
   "priority": "CRITICAL",
   "type": "INTERRUPT",
   "payload": {
-    "id": "int-scout-7491",
+    "id": "int-auditor-7491",
     "source": "a2a",
-    "payload_text": "Contradiction detected on a tracked topic — two notes give conflicting dates",
+    "payload_text": "Contradiction detected on dates_and_deadlines topic — PartnerCo CAO ask date conflicts between v1 and v2 notes",
     "ack_required": true,
     "ttl_ms": 600000
   },
-  "version_vector": { "scout-001-b7e9": 12 }
+  "version_vector": { "auditor-001-b7e9": 12 }
 }
 ```
 
-**Cross-Agent Domain Ownership Map (v3.1)**
+**Cross-Agent Domain Ownership Map (v3.1 — Covers All 37 Agents)**
 
-IMPACT emission cannot depend on each agent individually remembering to self-report — that guarantees blind spots. The map below is what makes the check UNIVERSAL: the conductor runs it against every delegated agent's output at QC Gate time (`agents/conductor.md` Step 6g), regardless of whether that agent's own file was ever specifically wired for IMPACT. Domain-specific emission hooks (like guardian's and secretary's) are a fidelity optimization on top of this floor, not a substitute for it.
-
-This map covers the core public roster. If you install an opt-in module (`leroy add security`, `leroy add boardroom`), those agents register their own rows the same way — extend the map, don't special-case them.
+IMPACT emission cannot depend on each of the org's 37 agents individually remembering to self-report — that guarantees blind spots (only 4 agent files were instrumented in the first pass of this protocol: conductor, secretary, guardian, auditor). The map below is what makes the check UNIVERSAL: conductor runs it against every delegated agent's output at QC Gate time (`agents/conductor.md` Step 6g), regardless of whether that agent's own file was ever specifically wired for IMPACT. Domain-specific emission hooks (like guardian's and auditor's) are a fidelity optimization on top of this floor, not a substitute for it.
 
 | Agent | Domain / shared resources it touches | Typical downstream-affected agents |
 |---|---|---|
 | builder | code (any product) | guardian (audit), tech-lead (CI/CD), vp-engineering |
-| designer | UI components, design tokens | builder |
-| forge | bulk data ops (10K+ records) | guardian, whoever owns the affected records |
-| professor | domain instruction / tutoring content | builder (if it drives code), cto |
-| guardian | code + shared data-file audits | builder, whoever owns the flagged file |
-| secretary | client timelines, contract/scope tracking | legal, proposal-writer, cfo |
-| legal | contracts, MSA/SOW, agreements | secretary, proposal-writer, cfo |
-| proposal-writer | client-facing decks, pricing | legal, secretary |
+| designer | UI components, design tokens | builder, integratorOS-agent (if PartnerCo) |
+| forge | bulk data ops (10K+ records) | auditor, analyst, guardian |
+| professor | BIM tool/BIM instruction, BIM tool usage | builder (if BIM tool scripting), cto |
+| guardian | code + shared data-file audits | builder, auditor, whoever owns the flagged file |
+| auditor | BOM/accessory/product data | guardian, builder, proposal-writer (pricing) |
+| secretary | client timelines, contract/scope tracking | legal, auditor, proposal-writer, cfo |
+| legal | contracts, MSA/SOW, insurance | secretary, proposal-writer, cfo |
+| proposal-writer | client-facing decks, pricing | legal, secretary, auditor |
 | tech-lead | CI/CD, infra, deployment | builder, forge, janitor |
-| janitor | cleanup, file org, stale removal | resolved by procedure, not a fixed list: at janitor's approval step, the conductor greps `memory/Agents/*/journal.md` + `memory/Projects/**` for the candidate filename — the grep result IS the affected-agents list |
+| janitor | cleanup, file org, stale removal | **procedure, not a fixed list (v1.1 fix, 2026-07-01)** — janitor never deletes directly, it surfaces a cleanup manifest and waits for Brian's approval (`agents/janitor.md`). At that approval step, conductor greps `memory/Agents/*/journal.md` + `memory/Projects/**` for each candidate file's name/path before Brian approves — whatever that grep turns up IS the affected-agents list for this row. This was the only row in the original map that named an unresolvable condition instead of a concrete procedure; live-execution testing caught it. |
 | scrum-leader | sprint scope, velocity, backlog | builder, designer, forge, vp-engineering |
 | hr | agent lifecycle (hiring/retiring/roles) | conductor (routing table), every agent whose role changes |
 | cfo | budget, token allocation | every agent whose work consumes tokens/spend |
 | cko | memory admission policy, vault governance | every agent that reads/writes memory |
 | cto | cross-product architecture decisions | vp-engineering, tech-lead, builder |
 | vp-engineering | code quality standards, release mgmt | builder, guardian, scrum-leader |
+| integratorOS-agent | PartnerCo platform design-system enforcement | builder (IntegratorOS work) |
+| Marketplace-overseer | Marketplace store ops, QC, publish | Marketplace-rd, Marketplace-manager, Marketplace-designer (see note below) |
+| Marketplace-rd | Marketplace trend/recon, Printify cross-ref | Marketplace-overseer |
+| Marketplace-manager | Marketplace niche/keep-kill decisions | Marketplace-designer, Marketplace-overseer |
+| Marketplace-designer | Marketplace POD artwork generation | Marketplace-manager |
+| cyber-operator | active CTF/bounty exploitation work | guardian (if findings apply to internal code) |
+| recon-agent | passive OSINT | cyber-operator |
+| ai-sec-agent | AI/LLM security research | guardian, cyber-operator |
+| analyst | CRM/PSA tool field validation | auditor, forge, builder |
 | chief-of-staff | dept status aggregation, MCP health | conductor (escalation), all dept heads |
 | scout | background pattern detection | hr (new-agent candidates), vp-engineering |
-| goal-overseer | executes goal steps via spawned specialists | inherits whatever the spawned specialist's domain is |
+| goal-overseer | executes /goal steps via spawned specialists | inherits whatever the spawned specialist's domain is |
 | alignment-monitor | skill/agent routing consistency, orphan detection | **should also periodically audit this IMPACT mechanism itself** — see below |
 | simulator | routing-regression validation | conductor, skill-matcher |
-| scraper | web extraction | forge (if scraped data feeds a data pipeline), whoever consumes it |
-| planner, quick, skill-matcher, mesh-wrapper, conductor | infra/orchestration/already covered | n/a or already wired |
+| scraper | web extraction (pricing/vendor data) | auditor, forge (if scraped data feeds BOM/pricing) |
+| planner, quick, skill-matcher, mesh-wrapper, conductor, secretary, guardian, auditor | infra/orchestration/already covered | n/a or already wired |
 
-**alignment-monitor's role in this protocol:** during its existing weekly audit, also check `memory/Agents/*/journal.md` and `memory/Agents/conductor/impact-ledger.md` for staleness (agents that produce cross-domain changes but have never journaled anything — a sign the emission hook isn't firing).
+**Known roster inconsistency found while building this map (flagging, not fixing here):** `Marketplace-manager`/`Marketplace-designer` and `Marketplace-overseer`/`Marketplace-rd` describe overlapping Marketplace responsibilities (niche selection, design generation, store ops) from two different, seemingly independently-authored agent pairs. This is exactly the kind of drift `alignment-monitor` exists to catch — worth a dedicated pass, separate from this protocol.
+
+**alignment-monitor's new role in this protocol:** during its existing weekly audit, also check `memory/Agents/*/journal.md` and `memory/Agents/conductor/impact-ledger.md` for staleness (agents that produce cross-domain changes but have never journaled anything — a sign the emission hook isn't firing) and for the roster drift class of issue above.
 
 **IMPACT receiver protocol (v3.1 — Persistent Cross-Agent Memory):**
 
-This is the mechanism that answers "when one agent changes something, does the COO understand what else that affects, and do other agents find out." It is NOT a one-time write — every IMPACT message grows two persistent files, and both compound across sessions.
+This is the mechanism that answers "when the secretary changes something, does the COO understand what else that affects, and do other agents find out." It is NOT a one-time write — every IMPACT message grows two persistent files, and both compound across sessions.
 
-1. **`to` is always `conductor-session`, `broadcast` optional as CC.** The conductor is the mandatory reviewer of every IMPACT — this is what gives the COO org-wide connect-the-dots visibility. Any agent can fire one; only the conductor persists them.
-2. **On receipt, the conductor writes to TWO places, both append-only (never overwrite):**
+1. **`to` is always `conductor-session`, `broadcast` optional as CC.** Conductor is the mandatory reviewer of every IMPACT — this is what gives the COO org-wide connect-the-dots visibility. Any agent can fire one; only conductor persists them.
+2. **On receipt, conductor writes to TWO places, both append-only (never overwrite):**
    - `memory/Agents/conductor/impact-ledger.md` — every IMPACT ever received, chronological. This is the COO's own growing cross-agent memory.
    - `memory/Agents/{agent}/journal.md` for EACH agent listed in `likely_affected_agents` — a dated entry stating what changed, who changed it, and why it might matter to that agent specifically.
-3. **Connect the dots before filing:** before writing, the conductor greps `memory/Agents/*/journal.md` for entries touching the same `changed_domain` or overlapping keywords from `change_summary`. If a match is found, the new journal entries note the connection explicitly ("this overlaps with builder's earlier entry on the same mapping key") rather than filing in isolation. This is what makes the memory grow instead of just accumulate.
-4. **Confidence gates severity, not whether it's logged.** `confidence >= 0.7` → also surface to the user in the response ("Heads up: the secretary's scope update likely affects legal and proposal-writer too"). `confidence < 0.7` → log silently, no interruption.
+3. **Connect the dots before filing:** before writing, conductor greps `memory/Agents/*/journal.md` for entries touching the same `changed_domain` or overlapping keywords from `change_summary`. If a match is found, the new journal entries note the connection explicitly ("this overlaps with builder's 2026-06-20 entry on the same accessory-map key") rather than filing in isolation. This is what makes the memory grow instead of just accumulate.
+4. **Confidence gates severity, not whether it's logged.** `confidence >= 0.7` → also surface to Brian in the response ("Heads up: secretary's ExampleClient update likely affects legal and auditor too"). `confidence < 0.7` → log silently, no interruption.
 5. **On every agent spawn (Step 4 DELEGATE in `agents/conductor.md`), read that target agent's last 5 `memory/Agents/{agent}/journal.md` entries and inject them into the spawn prompt.** This is how a freshly-spawned agent instance inherits what prior instances of the same role learned — memory tied to the AGENT IDENTITY, not just the session.
-6. **Emission triggers (who fires IMPACT, and when):** any agent whose Root-Cause Classification Gate (`agents/conductor.md`) or domain-specific escalation (guardian's Data-File Blast Radius, secretary's cross-domain event detection) concludes the change is systemic rather than isolated MUST fire an IMPACT before closing the task. Isolated-and-confirmed findings do not need one.
+6. **Emission triggers (who fires IMPACT, and when):** any agent whose Root-Cause Classification Gate (`agents/conductor.md`) or domain-specific escalation (auditor's Pattern Sweep §7a, guardian's Data-File Blast Radius) concludes the change is systemic rather than isolated MUST fire an IMPACT before closing the task. Isolated-and-confirmed findings do not need one.
+7. **No re-triggering from reads (loop-guard, v3.1 fix, 2026-07-01):** reading a journal entry during Agent Journal Scan (§1a-i) or during the "connect the dots" step above is READ-ONLY input to reasoning. It must NEVER itself generate a new IMPACT message. Only a genuine new event — a new tool call, a new finding, a new user report — can emit one. Without this rule, entry A referencing entry B during connect-the-dots could cause B's agent to re-scan and re-emit, compounding indefinitely.
+8. **Circuit breaker (mirrors DELEGATE's, v3.1 fix, 2026-07-01):** if the same `changed_domain` produces more than 3 IMPACT messages within a single session, conductor stops writing a fresh entry to every affected agent's journal for that domain — it consolidates into ONE ledger entry noting "repeated IMPACT on {domain}, N occurrences this session, affected agents already notified" and does not re-surface to Brian past the first confidence≥0.7 notice. This closes the gap DELEGATE already covers via its >3-hop/>3-message breaker (see A2A Delegation Governance below) but IMPACT lacked until now.
 
 **INTERRUPT receiver protocol:**
 1. Validate `payload.id` is unique (not already in `session/interrupts.queue`)
 2. Append a JSONL line: `{"id": payload.id, "ts": timestamp, "priority": priority, "source": payload.source, "payload": payload.payload_text, "ack_required": payload.ack_required, "surfaced": false, "acked": false}`
-3. Send `ACK` back to the originating agent immediately (mesh-level confirmation; does not imply the session has seen it)
+3. Send `ACK` back to the originating agent immediately (mesh-level confirmation; does not imply Claude has seen it)
 4. The PostToolUse hook handles surfacing on the next tool call.
 
 **Priority semantics for INTERRUPT specifically:**
 - `LOW` — queued only; never surfaced by hook (advisory record)
-- `MEDIUM` — surfaced once; no session ACK required
-- `HIGH` — surfaced once; session expected to acknowledge in user-facing text
-- `CRITICAL` — surfaced once with TodoWrite-pause warning; session must surface to user before next tool
+- `MEDIUM` — surfaced once; no Claude ACK required
+- `HIGH` — surfaced once; Claude expected to acknowledge in user-facing text
+- `CRITICAL` — surfaced once with TodoWrite-pause warning; Claude must surface to user before next tool
 
 **Priority levels:**
 - `CRITICAL` (0): Deadlock, conflict, immediate action required
@@ -618,7 +636,7 @@ def process_message(agent_id, message):
         affected = payload.get('likely_affected_agents', [])
         confidence = payload.get('confidence', 0.5)
         print(f"[A2A] conductor received IMPACT from {message['from']}: {changed_domain} -> {affected}")
-        # See "IMPACT receiver protocol" above — write to memory/Agents/conductor/impact-ledger.md
+        # See "IMPACT receiver protocol" below — write to memory/Agents/conductor/impact-ledger.md
         # AND to memory/Agents/{agent}/journal.md for each name in `affected`. Append-only, never overwrite.
 
 def send_ack(agent_id, target_agent, original_message):
@@ -640,7 +658,7 @@ def send_ack(agent_id, target_agent, original_message):
 - Parallel speedup: 2-5x (Tier-2+)
 
 ## Integration
-- **Full mesh:** Called by `@conductor` for Tier-2+ tasks (4+ packets)
+- **Full mesh:** Called by `@agent-conductor` for Tier-2+ tasks (4+ packets)
 - **A2A lite:** Available to any agent for DELEGATE/SUBSCRIBE/CACHE without conductor involvement
 - Falls back to hierarchical on mesh failure
 
@@ -651,7 +669,7 @@ def send_ack(agent_id, target_agent, original_message):
 | Caller Tier | Can Delegate To |
 |------------|----------------|
 | Tier-4 Specialist (builder, forge, legal) | Other Tier-4 specialists, Tier-5 support |
-| Tier-5 Support (scout, planner, scraper) | Other Tier-5 support agents only |
+| Tier-5 Support (auditor, analyst, scraper) | Other Tier-5 support agents only |
 | Tier-3 Management | Tier-4 and Tier-5 |
 | Tier-2 VP | Any tier below |
 
@@ -719,7 +737,7 @@ CACHE messages are peer-to-peer and not authenticated. Consumers should:
 
 ## Validation Tests
 
-1. **Message Passing (2 agents, builder x2)**
+1. **Message Passing (2 agents, techy x2)**
    - Agent A sends UPDATE to Agent B
    - Verify: Message appears in mesh-messages.jsonl
    - Verify: Agent B receives and processes
@@ -778,7 +796,7 @@ def spawn_mesh_team(packets):
     # Spawn agents with mesh wrapper
     agents = []
     for packet in packets:
-        agent_id = f"builder-{len(agents)+1:03d}-{hash_timestamp()}"
+        agent_id = f"techy-{len(agents)+1:03d}-{hash_timestamp()}"
         agent = spawn_agent(
             agent_type="builder",
             agent_id=agent_id,
@@ -813,9 +831,14 @@ If mesh fails (partition, deadlock, message storm):
 
 ---
 
-**Status:** Production-ready v3.0 — Full mesh for Tier-2+ tasks; A2A lightweight mode for all tiers.
+**Status:** Production-ready v3.1 (2026-07-01) — Full mesh for Tier-2+ tasks; A2A lightweight mode (including IMPACT) for all tiers.
 
-**Performance Targets (v3.0):**
+**A2A Pilot Targets:**
+1. builder → auditor DELEGATE: BOM validation mid-build (latency <5s, 0 deadlocks)
+2. forge → auditor SUBSCRIBE/NOTIFY: Pipeline completion signals (zero missed events)
+3. scraper → broadcast CACHE: Learned selectors shared before web extraction calls
+
+**Performance Targets (v3.1):**
 - Message overhead: <100ms per hop
 - Conflict resolution: >95% success rate
 - Deadlock rate: <1%

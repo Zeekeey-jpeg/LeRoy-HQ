@@ -17,31 +17,38 @@ Autonomous agents for complex, multi-step task handling.
 | diagram, draw, sketch, excalidraw, flowchart, architecture diagram, visualize | designer | Via conductor |
 | large data, 10K+, ETL, batch, bulk operations | forge | Via conductor |
 | commit, PR, merge, scope check, audit | guardian | Yes (before commits) |
-| domain expertise, tutoring, teach, explain a concept | professor | Via conductor |
+| BIM tool, BIM, families, schedules, model | professor | Via conductor |
 | growth, patterns, opportunities, what did you learn | scout | Yes (substantial tasks) |
 | todo, tasks, checklist, line items, 3+ steps | planner | Yes (3+ line items) |
+| validate, verify, check fields, report validation | analyst | Via conductor |
+| validate bom, check accessories, missing parts, quote completeness | auditor | Via conductor |
 | cleanup, clean, optimize, monday cleanup | janitor | Via schedule (Monday) |
+| browser extract, API docs, CW dev page, web scrape | builder | Via conductor (+ scout) |
 | scrape, extract web, crawl site, web data, firecrawl | scraper | Via conductor |
 | ok, yes, status, trivial queries, quick triggers | quick | Yes (ALL trivial requests) |
-| contract, agreement, NDA, MSA, SOW, legal, liability, insurance, clause | legal | Via conductor |
+| contract, agreement, NDA, MSA, SOW, legal, liability, insurance, E&O, clause | legal | Via conductor |
 | timeline, tracking, records, coordination, status summary | secretary | Yes (ALL substantial tasks) |
-| proposal, pitch, presentation, deck, quote presentation | proposal-writer | Via conductor |
+| proposal, pitch, presentation, deck, gamma, quote presentation | proposal-writer | Via conductor |
 | technical strategy, architecture, platform decisions, tech stack, infra | cto | Via CEO/COO |
 | hiring, performance, onboarding, team capacity, agent utilization | hr | Via CEO/COO |
 | sprint planning, velocity, backlog, standup, impediments, agile | scrum-leader | Via VP Engineering |
 | code quality, standards, tech debt, release, sprint approval | vp-engineering | Via CTO |
 | infrastructure, CI/CD, deployment, devops, build pipeline, monitoring | tech-lead | Via VP Engineering |
-| morning briefing, department status, ops report, connector health | chief-of-staff | Yes (morning trigger) |
+| morning briefing, department status, ops report, MCP health | chief-of-staff | Yes (morning trigger) |
 | research, development, R&D, simulation, protocol testing, validation | simulator | Via CEO/CTO |
 | alignment, orphan skills, dead references, routing gaps, check alignment | alignment-monitor | Via CKO (Monday) / on-demand |
 | memory quality, approve vault note, token allocation, strategic memory audit, knowledge governance | cko | Yes (weekly - Monday) |
 | token budget, memory cost, financial oversight, budget veto, approve large allocation | cfo | Yes (daily - morning) |
+| ctf, challenge, flag, tryhackme, hackthebox, burp, bug bounty, web exploitation, portswigger | cyber-operator | Via conductor |
+| osint, passive recon, subdomain, crt.sh, attack surface, github dork | recon-agent | Via conductor |
+| gandalf, prompt injection, jailbreak, llm attack, ai red team, owasp llm, ai security | ai-sec-agent | Via conductor |
+| IntegratorOS, IOS, PartnerCo platform, Supabase spatial, CesiumJS, security integrator SaaS | integratorOS-agent | Via conductor |
+| Marketplace, print on demand, POD, printify, store QC, publish listing, Marketplace store | Marketplace-overseer | Via CTO (autonomous Marketplace loop) |
+| Marketplace R&D, Marketplace trends, niche research, Marketplace recon, printify catalog | Marketplace-rd | Via Marketplace-overseer (6 AM daily) |
 | routing fallback, no match, dynamic routing | skill-matcher | Via COO (conductor.md Dynamic Routing) |
 | goal execution, autonomous goal, /goal high-effort | goal-overseer | Via /goal engine (background) |
 
-**Tie-break:** on keyword collision, a task-type keyword (e.g. deck/proposal) beats a subject-matter keyword (e.g. a project name).
-
-> **Opt-in security module:** An authorized-testing squad (offensive-security / OSINT / AI-security agents) ships separately behind an authorization-acknowledgment gate. Install it with `leroy add security`. Those agents are not part of the core roster and are not listed here.
+**Tie-break:** on keyword collision, a task-type keyword (e.g. Gamma/deck/proposal) beats a subject-matter keyword (e.g. a project name).
 
 ---
 
@@ -52,28 +59,47 @@ This folder contains **production agents** - fully specified, routable agents wi
 ### 1. Production Agents (This Folder)
 Standalone agents with complete specifications, routing keywords, auto-spawn triggers, and defined responsibilities.
 
-**Registered agents (executable):**
+**37 registered agents (executable)** — corrected from 35 on 2026-07-01 (live-execution testing caught the count was stale and cross-checked it against an actual `agents/*.md` glob):
 - conductor, builder, designer, forge
-- guardian, professor, scout, planner, janitor
+- guardian, professor, scout, planner, analyst, auditor, janitor
 - legal, quick, secretary, mesh-wrapper (infrastructure)
 - skill-matcher (COO no-match routing fallback — infrastructure)
 - goal-overseer (autonomous /goal step executor — background)
-- proposal-writer (presentation generation)
-- scraper (web extraction)
-- cto, cfo, cko, hr, scrum-leader, vp-engineering (leadership)
+- proposal-writer (Gamma MCP integration)
+- scraper (Firecrawl web extraction)
+- cto, cfo, cko, hr, scrum-leader, vp-engineering (YourCo Office leadership)
 - tech-lead (infra / CI-CD / DevOps manager — under VP Engineering)
 - chief-of-staff (morning briefing coordination, department status)
-- simulator (protocol testing, validation)
+- simulator (protocol testing, validation — R&D/simulation only; NOT Marketplace R&D)
 - alignment-monitor (Skill-agent alignment guardian - orphan detection, routing audits)
+- integratorOS-agent (IntegratorOS / PartnerCo platform specialist)
+- **cyber-operator** (CTF solving, web exploitation, bug bounty — YourCo Cyber Dept)
+- **recon-agent** (Passive OSINT only — YourCo Cyber Dept)
+- **ai-sec-agent** (AI/LLM security, Gandalf, OWASP LLM — YourCo Cyber Dept)
+- **Marketplace-overseer** (Marketplace POD store orchestrator + QC — reports to CTO)
+- **Marketplace-rd** (Marketplace daily trend/recon scout — reports to Marketplace-overseer)
+- **Marketplace-manager** (Marketplace niche/keep-kill decisions — reports to COO) ⚠️ added 2026-07-01, was missing from this index entirely
+- **Marketplace-designer** (Marketplace POD artwork generation — reports to Marketplace-manager) ⚠️ added 2026-07-01, was missing from this index entirely
 
-**Reference docs (not executable agents — read by COO/CTO for governance):**
+⚠️ **Known overlap, not yet resolved:** `Marketplace-manager`/`Marketplace-designer` and `Marketplace-overseer`/`Marketplace-rd` describe overlapping Marketplace responsibilities (niche selection, design generation, store ops) — look like two independently-built agent pairs. Flagged for `alignment-monitor`'s roster-drift cleanup, not fixed here.
+
+**4 reference docs (not executable agents — read by COO/CTO for governance):**
 - `QUICK-REFERENCE.md` — quick agent lookup card
+- `audit-agent-tools.md` — agent tool capability auditor checklist
 - `c-suite-tool-constraints.md` — C-suite write-tool restrictions
 - `org-governance.md` — full 5-tier org hierarchy & role rules
 
 **How to use:** Reference by name in CLAUDE.md quick triggers or route via keywords in the Routing Table above.
 
-### 2. Infrastructure Docs (skills/meta/)
+### 2. Dynamic Templates (skills/workflows/leroy/)
+Prompt templates for spawning temporary agents in specific workflows.
+
+- `scraper-agent.md` - LeRoy data collector template (Phase 1A)
+- `generator-agent.md` - LeRoy report generator template (Phase 2)
+
+**How to use:** Spawned dynamically by factory agents. Not directly routable; context-specific to LeRoy workflow.
+
+### 3. Infrastructure Docs (skills/meta/)
 Guides and reference documentation for the agent system.
 
 - `agent-creator.md` - Guide for creating new production agents
@@ -94,7 +120,7 @@ Guides and reference documentation for the agent system.
 | **designer** | UI/UX design, components, styling | magenta | inherit |
 | **forge** | Large data operations (10K+ records) | yellow | inherit |
 | **guardian** | Commit QA, scope validation, auditing | red | inherit |
-| **professor** | Domain-expert tutor/instructor template | green | inherit |
+| **professor** | BIM expertise, BIM tool operations | green | inherit |
 
 ### Leadership Team (C-Suite & VPs)
 
@@ -107,8 +133,25 @@ Guides and reference documentation for the agent system.
 | **scrum-leader** | Sprint planning, velocity, backlog, agile coaching | orange | inherit |
 | **vp-engineering** | Code quality, standards, tech debt, release management | indigo | inherit |
 | **tech-lead** | Infrastructure, CI/CD, deployment, DevOps, build pipeline, monitoring (under VP Engineering) | indigo | inherit |
-| **simulator** | R&D — Protocol testing, validation framework | cyan | haiku |
+| **simulator** | R&D department - Protocol testing, validation framework | cyan | haiku |
 | **alignment-monitor** | Skill-agent alignment guardian, orphan detection | orange | haiku |
+
+### Cyber Department
+
+| Agent | Role | Color | Model |
+|-------|------|-------|-------|
+| **cyber-operator** | CTF solving, web exploitation, bug bounty, Burp coordination | red | sonnet |
+| **recon-agent** | Passive OSINT only (WebFetch + WebSearch, no active packets) | orange | haiku |
+| **ai-sec-agent** | AI/LLM security, Gandalf challenges, OWASP LLM Top 10 | purple | sonnet |
+
+### Marketplace Department (Autonomous)
+
+| Agent | Role | Color | Model |
+|-------|------|-------|-------|
+| **Marketplace-overseer** | Marketplace POD store orchestrator — QC, publish, pricing, holiday ramp, IP guardrails, management report | orange | sonnet |
+| **Marketplace-rd** | Daily R&D / recon scout — trend crawl, Printify cross-ref, ranked opportunity feed | cyan | sonnet |
+
+> **Legacy files (superseded):** `agents/Marketplace-manager.md` and `agents/Marketplace-designer.md` reflect the v1 crew architecture. The current architecture uses Marketplace-overseer + Marketplace-rd. The legacy files are archived in place.
 
 ### Background Agents
 
@@ -116,13 +159,15 @@ Guides and reference documentation for the agent system.
 |-------|------|-------|-------|
 | **scout** | Silent pattern detection, growth opportunities | green | haiku |
 | **planner** | Background task tracking, auto-completion detection | orange | haiku |
-| **janitor** | Monday cleanup orchestrator, multi-category parallel scan | orange | haiku |
+| **analyst** | Report specification validation | orange | haiku |
+| **janitor** | Monday cleanup orchestrator, 11-category parallel scan | orange | haiku |
+| **auditor** | BOM validation, accessory detection, catalog cross-reference | orange | haiku |
 | **legal** | Contract drafting, review, insurance alignment, clause library | teal | inherit |
-| **secretary** | Background timeline tracking, coordination, status summaries | purple | haiku |
+| **secretary** | Background timeline tracking, legal coordination, status summaries | purple | haiku |
 | **quick** | Trivial query handler, quick trigger router, 100% coverage | gray | haiku |
-| **proposal-writer** | Branded proposals and sales decks | cyan | inherit |
-| **scraper** | Intelligent web extraction with learning | orange | inherit |
-| **chief-of-staff** | Morning briefing coordination, department status, connector health | gold | haiku |
+| **proposal-writer** | YourCo-branded proposals via Gamma.app, sales decks | cyan | inherit |
+| **scraper** | Intelligent web extraction via Firecrawl with learning | orange | inherit |
+| **chief-of-staff** | Morning briefing coordination, department status, MCP health | gold | haiku |
 | **skill-matcher** | COO no-match routing fallback, dynamic routing (spawned by conductor.md) | gray | haiku |
 | **goal-overseer** | Autonomous /goal step executor, high-effort goal execution (background) | gray | haiku |
 
@@ -160,7 +205,7 @@ No helper agent works without overseer coordination.
 | Code implementation | conductor | builder |
 | UI/design work | conductor | designer + builder |
 | Large data operations | conductor | forge |
-| Domain-expertise work | conductor | professor |
+| BIM/BIM tool work | conductor | professor |
 | Before any commit | conductor | guardian |
 | Complex feature | conductor | builder + designer + guardian |
 | **Legal/Contract Work** | | |
@@ -168,6 +213,12 @@ No helper agent works without overseer coordination.
 | Contract review | conductor | legal |
 | Pre-signing verification | conductor | legal |
 | Negotiation support | conductor | legal |
+| **Browser Workflows** | | |
+| API doc extraction | conductor | builder |
+| Price comparison → catalog | conductor | forge |
+| Multi-page crawl | conductor | builder (coordinate) |
+| Form/UI analysis | conductor | designer |
+| Browser pattern detection | (background) | scout |
 | **Web Extraction** | | |
 | Single page scrape | conductor | scraper |
 | Structured data extraction | conductor | scraper |
@@ -215,6 +266,7 @@ Types:
   uiux     = designer
   data     = forge
   sentinel = guardian
+  BIM tool    = professor
   growth   = scout
   micro    = quick
 
@@ -290,7 +342,7 @@ DOES NOT:
 ### builder
 ```yaml
 DOES:
-  - Write application code
+  - Write React/TypeScript code
   - Implement features and fixes
   - Create API integrations
   - Write tests
@@ -306,7 +358,7 @@ DOES NOT:
 DOES:
   - Design UI components
   - Create design tokens
-  - Style with your component library
+  - Style with Tailwind/shadcn
   - Ensure accessibility
 
 DOES NOT:
@@ -346,14 +398,14 @@ DOES NOT:
 ### professor
 ```yaml
 DOES:
-  - Domain instruction and guidance
-  - Conceptual explanation before procedure
-  - Structured tutoring and review
-  - Assessment and feedback
+  - BIM tool operations via BIM tool
+  - BIM expertise and guidance
+  - Family/type management
+  - Schedule/quantity takeoffs
 
 DOES NOT:
-  - General coding tasks (delegate to builder)
-  - Architecture decisions
+  - Non-BIM development
+  - General coding tasks
 ```
 
 ### scout
@@ -391,6 +443,21 @@ DOES NOT:
   - Skip verification before auto-close
 ```
 
+### analyst
+```yaml
+DOES:
+  - Validate report fields exist in data sources
+  - Check CRM/PSA tool property availability
+  - Confirm calculation feasibility
+  - Provide validation reports
+
+DOES NOT:
+  - Create or modify reports
+  - Change data in source systems
+  - Block report creation (advisory)
+  - Make business decisions
+```
+
 ---
 
 ## Handoff Protocols
@@ -403,17 +470,19 @@ DOES NOT:
 | conductor | designer | UI/design decisions needed |
 | conductor | forge | Large data operation needed |
 | conductor | guardian | Before any commit |
-| conductor | professor | Domain-expertise work needed |
+| conductor | professor | BIM/BIM tool work needed |
 | conductor | legal | Contract drafting or review needed |
 | builder | conductor | Implementation complete, needs QC |
 | designer | conductor | Design complete, needs QC |
 | guardian | conductor | Audit complete, ready for merge |
 | scout | conductor | Patterns ready to surface |
+| conductor | analyst | Report validation needed |
+| analyst | conductor | Validation complete |
 | legal | conductor | Contract review complete, ready for decision |
 | legal | secretary | Contract action complete, needs tracking |
 | secretary | chief-of-staff | Morning routine - provide 24h event summary |
 | chief-of-staff | conductor | Briefing complete, critical items flagged |
-| chief-of-staff | secretary | Connector failure creates one-off reminder |
+| chief-of-staff | secretary | MCP failure creates one-off reminder |
 
 ### Growth Monitor Handoff
 
@@ -465,28 +534,34 @@ agents/
 ├── forge.md
 ├── scout.md
 ├── mesh-wrapper.md                  ← Lateral communication (A2A-enhanced, all tiers)
+├── auditor.md
 ├── guardian.md
+├── analyst.md
 ├── professor.md
 ├── builder.md
 ├── designer.md
 ├── legal.md                         ← Contract drafting, review, insurance alignment
-├── secretary.md                     ← Background timeline tracking, coordination
-├── proposal-writer.md               ← Branded proposals and sales decks
-├── scraper.md                       ← Web extraction with learning
+├── secretary.md                     ← Background timeline tracking, legal coordination
+├── proposal-writer.md               ← YourCo-branded proposals via Gamma.app
+├── scraper.md                       ← Firecrawl web extraction with learning
 ├── cto.md                           ← Technical strategy, architecture, platform decisions
 ├── hr.md                            ← Hiring, performance, team capacity, utilization
 ├── scrum-leader.md                  ← Sprint planning, velocity, backlog, agile coaching
 ├── vp-engineering.md                ← Code quality, standards, tech debt, releases
-├── tech-lead.md                     ← Infra / CI-CD / DevOps manager (under VP Engineering)
-├── chief-of-staff.md                ← Morning briefing coordination, department status
-├── cfo.md                           ← Token budget oversight
-├── cko.md                           ← Vault governance, knowledge quality gate
-├── simulator.md                     ← R&D — Protocol testing, validation
-├── alignment-monitor.md             ← Skill-agent alignment guardian
-├── skill-matcher.md                 ← COO no-match routing fallback
-├── goal-overseer.md                 ← Autonomous /goal step executor (background)
-└── agent-cards/                     ← A2A Protocol capability registry (agent-cards/README.md)
+├── chief-of-staff.md               ← Morning briefing coordination, department status, MCP health
+├── simulator.md                     ← R&D department - Protocol testing, validation
+├── cyber-operator.md               ← CTF solving, web exploitation, bug bounty (YourCo Cyber Dept)
+├── recon-agent.md                  ← Passive OSINT only (YourCo Cyber Dept)
+└── ai-sec-agent.md                 ← AI/LLM security, Gandalf, OWASP LLM (YourCo Cyber Dept)
+├── alignment-monitor.md            ← Skill-agent alignment guardian
+├── Marketplace-overseer.md                ← Marketplace POD store orchestrator (active)
+├── Marketplace-rd.md                      ← Marketplace R&D / recon scout (active)
+├── Marketplace-manager.md                 ← [LEGACY — superseded by Marketplace-overseer]
+├── Marketplace-designer.md                ← [LEGACY — superseded by Marketplace-overseer workflow]
+└── agent-cards/                    ← A2A Protocol capability registry (agent-cards/README.md)
     ├── README.md
+    ├── auditor.agent.json           ← external_safe: true
+    ├── analyst.agent.json           ← external_safe: true
     ├── proposal-writer.agent.json   ← external_safe: true
     ├── professor.agent.json         ← external_safe: true
     ├── scraper.agent.json           ← external_safe: true
@@ -497,12 +572,28 @@ agents/
 
 ---
 
+### auditor
+```yaml
+DOES:
+  - Validate PSA tool opportunity product lists
+  - Cross-reference product catalog tool and PSA tool catalogs
+  - Detect missing accessories using accessory map
+  - Generate validation reports with revenue impact
+  - Send email notifications for findings
+
+DOES NOT:
+  - Modify PSA tool opportunities
+  - Add items to quotes automatically
+  - Make pricing decisions
+  - Override sales engineer judgment
+```
+
 ### secretary
 ```yaml
 DOES:
   - Auto-spawn on ALL substantial tasks (background)
   - Track timeline events (emails, meetings, documents)
-  - Update project records automatically
+  - Update Projects/{Client}/index.md records automatically
   - Coordinate with legal agent via state.json
   - Generate 24h status summaries for morning routine
   - Detect trackable actions from tool results
@@ -518,7 +609,7 @@ DOES NOT:
 ### legal
 ```yaml
 DOES:
-  - Draft contracts from approved templates
+  - Draft contracts from approved templates (UniCast, DESCCO, ExampleClient patterns)
   - Review incoming contracts against insurance coverage
   - Cross-check clauses against approved clause library
   - Run pre-signing checklists for engagement types
@@ -528,11 +619,11 @@ DOES:
   - Generate redline suggestions for problematic clauses
 
 DOES NOT:
-  - Execute or sign contracts (the user only)
+  - Execute or sign contracts (Brian only)
   - Provide legal advice (provides risk assessment only)
   - Modify insurance policy terms
   - Approve contracts containing deal breakers
-  - Override the user's negotiation decisions
+  - Override Brian's negotiation decisions
   - Share confidential contract terms externally
   - Create binding commitments
 ```
@@ -581,12 +672,12 @@ DOES NOT:
 ### proposal-writer
 ```yaml
 DOES:
-  - Generate branded proposals and presentations
+  - Generate YourCo-branded proposals via Gamma.app API
   - Apply consistent visual identity (colors, fonts, tone)
   - Structure content for executive audiences
   - Export to PDF/PPTX for client delivery
   - Poll generation status until complete
-  - Integrate with deal/CRM context when available
+  - Integrate with CRM deal context
 
 DOES NOT:
   - Create proposals without deal context
@@ -601,7 +692,7 @@ DOES NOT:
 ### scraper
 ```yaml
 DOES:
-  - Extract web content via a scraping backend
+  - Extract web content via Firecrawl MCP
   - Check fingerprints for structure changes
   - Use learned selectors with fallback ordering
   - Route through batch queue for bulk operations
@@ -612,7 +703,7 @@ DOES NOT:
   - Make architectural decisions
   - Skip fingerprint checks
   - Ignore rate limits
-  - Store credentials (uses local session config)
+  - Store credentials (uses session/credentials.json)
   - Bypass learning system feedback
 ```
 
@@ -621,10 +712,10 @@ DOES NOT:
 DOES:
   - Coordinate morning briefing data collection from all departments
   - Format briefing output in department-based structure
-  - Track connector health status across morning briefings
+  - Track MCP health status across morning briefings
   - Escalate critical items to Executive Summary
-  - Auto-create one-off reminders for persistent connector failures
-  - Collect status from department heads
+  - Auto-create one-off reminders for persistent MCP failures
+  - Collect status from 7 department heads
   - Map raw tool data to business-relevant department sections
 
 DOES NOT:
@@ -646,7 +737,7 @@ DOES:
   - Track compliance metrics across 5 validation dimensions
 
 DOES NOT:
-  - Write to production databases or external systems
+  - Write to production databases (PSA tool, CRM, product catalog tool, Supabase)
   - Modify memory vault files
   - Create commits or PRs
   - Send emails or make external API calls
@@ -674,4 +765,20 @@ DOES NOT:
 
 ---
 
-*Agents Index | executable agents + 3 reference docs | 4-tier scaling | 20+ capacity | 100% agent coverage | Mesh v3.0 (A2A-enhanced) | Agent Cards v1.0 | Tie-break rule v1.0 | opt-in security module (leroy add security)*
+## Skill Assignments (KB Ingestion 2026-02-15)
+
+**5 new backend skills assigned:**
+
+| Skill | Path | Owner | Domain |
+|-------|------|-------|--------|
+| supabase-rls-implementation.md | `skills/stacks/` | builder | Supabase RLS SQL templates, policy patterns |
+| supabase-vector-search-implementation.md | `skills/stacks/` | builder | pgvector setup, HNSW indexing, similarity queries |
+| openai-pdf-extraction.md | `skills/integrations/` | builder | Structured Outputs API, PDF ingestion, embeddings |
+| anthropic-claude-coaching.md | `skills/integrations/` | builder | Claude Messages API, streaming, system prompts |
+| backend-agent-conventions.md | `skills/workflows/` | vp-engineering | Code organization, naming, security, performance rules |
+
+**Orphan Status:** 0 of 5 new skills orphaned (100% coverage)
+
+---
+
+*Agents Index v5.4 | 37 executable agents + 4 reference docs | 4-tier scaling | 20+ capacity | 100% agent coverage | Mesh v3.1 (A2A-enhanced + persistent IMPACT) | Agent Cards v1.0 (13/37 agents have cards) | Gamma v1.0 | Firecrawl v1.0 | YourCo Office v1.2 (tech-lead under VP-Eng) | Cyber Dept v1.0 | Marketplace Dept v2.0 (Marketplace-overseer + Marketplace-rd + Marketplace-manager + Marketplace-designer, overlap unresolved) | +skill-matcher +goal-overseer registered | Tie-break rule v1.0*

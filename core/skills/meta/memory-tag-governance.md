@@ -28,7 +28,7 @@ user-invocable: false
 
 **Example:**
 ```yaml
-tags: [decisions, ticketing, crm]
+tags: [decisions, PSA tool, CRM]
       ^^^^^^^^^
       Folder tag (required)
 ```
@@ -37,10 +37,10 @@ tags: [decisions, ticketing, crm]
 
 **Valid Software/Integration Tags:**
 ```
-ticketing | crm | catalog | bim | android
+PSA tool | CRM | product catalog tool | BIM tool | android
 git | netlify | playwright | supabase | gas
 python | memory-system | enforcement | leroy
-cyber | tryhackme | hackthebox | burpsuite | portswigger
+cyber | tryhackme | hackthebox | burpsuite | portswigger | poker
 ```
 
 **Purpose:** Enable O(1) tag intersection lookups (software-specific queries)
@@ -132,8 +132,8 @@ Time: <1ms (O(1) lookup)
 
 **With Structured Tags:**
 ```python
-# Find all your CRM decisions
-notes = index["decisions"]["ticketing"]  # O(1)
+# Find all PSA tool decisions
+notes = index["decisions"]["PSA tool"]  # O(1)
 ```
 
 **Without Structured Tags:**
@@ -146,7 +146,7 @@ notes = scan_all_notes_for_keyword("automation")  # O(n)
 
 **Good (Permanent):**
 ```yaml
-tags: [decisions, ticketing]  # your CRM will always exist
+tags: [decisions, PSA tool]  # PSA tool will always exist
 ```
 
 **Bad (Temporary):**
@@ -160,8 +160,8 @@ tags: [decisions, v5.1]  # v5.1 is obsolete when v5.2 ships
 
 **Software Tags:**
 - Precisely identify which systems are involved
-- Enable "show me all your CRM notes" queries
-- Support multi-system filtering (e.g., "ticketing + crm")
+- Enable "show me all CRM notes" queries
+- Support multi-system filtering (e.g., "PSA tool + CRM")
 
 **Descriptive Tags:**
 - Subjective ("important" to whom?)
@@ -195,15 +195,15 @@ tags: [v5.2, ...]        # ❌ No folder named "v5.2"
 
 **Valid Software Tags:**
 ```
-ticketing | crm | catalog | bim | android
+PSA tool | CRM | product catalog tool | BIM tool | android
 git | netlify | playwright | supabase | gas
 python | memory-system | enforcement | leroy
-cyber | tryhackme | hackthebox | burpsuite | portswigger
+cyber | tryhackme | hackthebox | burpsuite | portswigger | poker
 ```
 
 **Valid:**
 ```yaml
-tags: [decisions, ticketing, crm]  # ✅ Both in valid list
+tags: [decisions, PSA tool, CRM]  # ✅ Both in valid list
 ```
 
 **Invalid:**
@@ -220,13 +220,13 @@ tags: [patterns, automation]    # ❌ "automation" not in valid list
 ```yaml
 tags: [decisions]                              # ✅ 1 tag
 tags: [patterns, memory-system]                # ✅ 2 tags
-tags: [decisions, ticketing, crm]        # ✅ 3 tags
+tags: [decisions, PSA tool, CRM]        # ✅ 3 tags
 tags: [patterns, memory-system, enforcement, git]  # ✅ 4 tags
 ```
 
 **Invalid:**
 ```yaml
-tags: [decisions, cw, hs, catalog, python]  # ❌ 5 tags (max 4)
+tags: [decisions, cw, hs, product catalog tool, python]  # ❌ 5 tags (max 4)
 ```
 
 ### Step 4: Check for Duplicates
@@ -252,12 +252,12 @@ tags: [decisions, decisions, cw]        # ❌ "decisions" duplicated
 
 **Bad:**
 ```yaml
-tags: [ticketing, crm]
+tags: [PSA tool, CRM]
 ```
 
 **Fix:**
 ```yaml
-tags: [decisions, ticketing, crm]  # Added folder tag
+tags: [decisions, PSA tool, CRM]  # Added folder tag
 ```
 
 ### Mistake 2: Descriptive Tags
@@ -288,12 +288,12 @@ tags: [patterns, enforcement]  # Removed version
 
 **Bad:**
 ```yaml
-tags: [decisions, cw, hs, catalog, git, python]
+tags: [decisions, cw, hs, product catalog tool, git, python]
 ```
 
 **Fix:**
 ```yaml
-tags: [decisions, ticketing, crm]  # Kept top 3 most relevant
+tags: [decisions, PSA tool, CRM]  # Kept top 3 most relevant
 ```
 
 ### Mistake 5: Empty Tags
@@ -384,7 +384,7 @@ python scripts/validate-tags.py  # (future tool)
 ```
 New integration: Salesforce MCP
 Valid tag: "salesforce"
-Usage: tags: [decisions, salesforce, crm]
+Usage: tags: [decisions, salesforce, CRM]
 ```
 
 ---
@@ -397,9 +397,9 @@ Usage: tags: [decisions, salesforce, crm]
 ```json
 {
   "tag_intersections": {
-    "decisions+ticketing": [/* note IDs */],
+    "decisions+PSA tool": [/* note IDs */],
     "patterns+memory-system": [/* note IDs */],
-    "decisions+ticketing+crm": [/* note IDs */]
+    "decisions+PSA tool+CRM": [/* note IDs */]
   }
 }
 ```

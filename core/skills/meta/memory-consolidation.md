@@ -46,11 +46,11 @@ half_life_days: 90       # OPTIONAL override — else type default below applies
 | `decision` | ∞ (never) | Architectural choices stick until explicitly superseded |
 | `pattern` | 90 days | Patterns are facts about how the system works |
 | `skill-learned` | 90 days | Lessons from real incidents — facts about the world |
-| `preference` | 180 days | the user's preferences are stable; user re-confirms slowly |
+| `preference` | 180 days | Brian's preferences are stable; user re-confirms slowly |
 | `project-note` | 90 days | Project facts age but slowly |
 | `general` | 30 days | Default for misc content — short leash |
 
-**MCP types (if writing via `memory remember`):** fact=90, experience=30, preference=180, decision=∞, context=7, belief=30, warning=∞.
+**MCP types (if writing via `YourCo-memory remember`):** fact=90, experience=30, preference=180, decision=∞, context=7, belief=30, warning=∞.
 
 **Decay formula** (computed at index time by `build-memory-index.py`):
 ```
@@ -61,7 +61,7 @@ half_life is None → no decay even if inferred
 
 **Recall floor:** notes with `effective_confidence < 0.3` are dropped at Pass 0.25 unless `--include-stale` is set.
 
-**Re-verification:** when the user re-confirms a fact, consolidation MUST bump `last_verified` to today (resets decay clock). When the user explicitly states what was previously inferred, also flip `inferred: false` and bump `confidence: 1.0`.
+**Re-verification:** when Brian re-confirms a fact, consolidation MUST bump `last_verified` to today (resets decay clock). When Brian explicitly states what was previously inferred, also flip `inferred: false` and bump `confidence: 1.0`.
 
 **Backward compatibility:** existing 479 notes lack these fields → defaults make them asserted with confidence 1.0 → no behavior change. Only new writes carry decay metadata.
 
@@ -72,12 +72,12 @@ half_life is None → no decay even if inferred
 **Schema (frontmatter):**
 ```yaml
 ---
-name: your organization CAO Ask v2
+name: PartnerCo CAO Ask v2
 type: decision
 edges:
-  supersedes:    ["[[your organization-CAO-Ask-v1]]"]      # this note REPLACES the listed notes
-  contradicts:   ["[[Old-your organization-Strategy]]"]    # this note disagrees with these
-  supports:      ["[[the user-Voice-Style]]"]   # this note reinforces these
+  supersedes:    ["[[PartnerCo-CAO-Ask-v1]]"]      # this note REPLACES the listed notes
+  contradicts:   ["[[Old-PartnerCo-Strategy]]"]    # this note disagrees with these
+  supports:      ["[[Brian-Voice-Style]]"]   # this note reinforces these
   derived_from:  ["[[Email-Thread-2026-04]]"] # this note was extracted from these
   refers_to:     ["[[Robin-Wonsetler]]"]      # generic reference (legacy bucket)
 ---
@@ -88,7 +88,7 @@ edges:
 | Edge | When to write | Example |
 |---|---|---|
 | `supersedes` | New version replaces old. Recall demotes the old by -0.5 score and tags `[SUPERSEDED]`. | v2 of an architecture decision |
-| `contradicts` | Two notes disagree. Recall surfaces both with `[CONFLICT]` tag. (Phase B: blocks consolidation on CRITICAL topics.) | the user said X on Monday, Y on Friday |
+| `contradicts` | Two notes disagree. Recall surfaces both with `[CONFLICT]` tag. (Phase B: blocks consolidation on CRITICAL topics.) | Brian said X on Monday, Y on Friday |
 | `supports` | This note reinforces another. Used for confidence boosts in Phase B. | A new pattern proves a prior preference |
 | `derived_from` | Provenance chain. This note was extracted from another (email, transcript, doc). | Note built from a Gmail thread |
 | `refers_to` | Generic reference. Legacy `[[wikilink]]` and `related:` field collapse here. | Mention of a person, project, or term |
@@ -105,7 +105,7 @@ edges:
 - "Does this contradict anything I previously stored?" — semantic check against opposing claims
 - If yes to either, write the edge AND log a candidate to `session/edge-candidates.json` for Phase B human review.
 
-**Never auto-promote inferred edges to typed.** Phase B will add an inference engine that writes candidates to `session/edge-candidates.json` for explicit the user approval. Until then, only Claude (during consolidation) or the user (manual) writes typed edges.
+**Never auto-promote inferred edges to typed.** Phase B will add an inference engine that writes candidates to `session/edge-candidates.json` for explicit Brian approval. Until then, only Claude (during consolidation) or Brian (manual) writes typed edges.
 
 **Backward compatibility:** notes without `edges:` block keep working — body wikilinks and frontmatter `related:` automatically collapse to `refers_to`. Index emits both typed and flat formats (`memory-graph.json` v2.0 has `edges` + `legacy_edges` keys). One-shot backup of pre-typed graph saved as `memory-graph.json.pre-typed.bak`.
 
@@ -474,13 +474,13 @@ Scan session for:
 - **Project Learnings** → `Projects/{project}/{topic}.md`
   - **CRITICAL:** Path must be `Projects/{Client}/{topic}.md` NOT `{Client}/Projects/{topic}.md`
   - **Dynamic normalization (v2.1 - 2026-02-01):** Works for ALL clients (existing + future)
-    - **Step 1:** Alias resolution (only true shortcuts: org → your org)
-    - **Step 2:** Folder scan (case-insensitive: partner → your organization, exampleclient → ExampleClient)
+    - **Step 1:** Alias resolution (only true shortcuts: YourCo → YourCo)
+    - **Step 2:** Folder scan (case-insensitive: PartnerCo → PartnerCo, descco → Descco)
     - **Step 3:** Auto-create new clients (title case: newclient → Newclient, acronyms: ACME → ACME)
   - **Alias map:** Only for shortcuts to different names (not case variations)
   - **No hardcoding required:** System adapts to new clients automatically
 - **Error Solutions** → `Error-Solutions/{category}/{error-pattern}.md`
-- **Agent Journal Entries** → `Agents/{agent-name}/journal.md` (append-only, per-agent persistent memory — NOT session-scoped. Written by the conductor on `[A2A:IMPACT]` receipt, or by any agent noting a cross-domain-relevant change. See `agents/mesh-wrapper.md` IMPACT protocol and `memory/Agents/index.md`. Never overwrite; always append with a dated entry.)
+- **Agent Journal Entries** → `Agents/{agent-name}/journal.md` (append-only, per-agent persistent memory — NOT session-scoped. Written by conductor on `[A2A:IMPACT]` receipt, or by any agent noting a cross-domain-relevant change. See `agents/mesh-wrapper.md` IMPACT protocol and `memory/Agents/index.md`. Never overwrite; always append with a dated entry.)
 
 **PATH VALIDATION (MANDATORY):**
 
@@ -495,7 +495,7 @@ def validate_note_path(path):
         - Decisions/my-decision.md
         - Patterns/my-pattern.md
         - Skills-Learned/my-skill.md
-        - Projects/your organization/my-note.md
+        - Projects/PartnerCo/my-note.md
 
     INVALID:
         - Claude/Decisions/my-decision.md  (ghost Claude/ prefix — legacy, never existed on disk)
@@ -555,15 +555,15 @@ For EVERY note about to be written, decide ONE of these classifications:
 
 | Classification | Frontmatter | When to use |
 |---|---|---|
-| **Asserted** | `inferred: false` (or omit — default) | User explicitly stated this. Direct quotes, contracts, system facts, decisions the user made. NEVER decays. |
-| **Inferred** | `inferred: true` + `confidence` + `last_verified` | YOU inferred from sample/observation. Behavioral guesses, pattern extrapolations, "the user seems to prefer X" with N<10 samples. DECAYS over time. |
+| **Asserted** | `inferred: false` (or omit — default) | User explicitly stated this. Direct quotes, contracts, system facts, decisions Brian made. NEVER decays. |
+| **Inferred** | `inferred: true` + `confidence` + `last_verified` | YOU inferred from sample/observation. Behavioral guesses, pattern extrapolations, "Brian seems to prefer X" with N<10 samples. DECAYS over time. |
 
 **Decision rule (apply per note):**
 1. Did the user **say** this in plain words this session? → asserted
 2. Is this a contract, dollar figure, date, or signed commitment? → asserted
-3. Is this an architectural decision the user explicitly chose? → asserted (`type: decision` → never decays anyway)
+3. Is this an architectural decision Brian explicitly chose? → asserted (`type: decision` → never decays anyway)
 4. Did YOU pattern-match across <10 samples to infer this? → inferred
-5. Is this "the user probably wants X based on context"? → inferred
+5. Is this "Brian probably wants X based on context"? → inferred
 6. Is this a workflow pattern observed once or twice? → inferred
 
 **Frontmatter when inferred=true (REQUIRED):**
@@ -571,7 +571,7 @@ For EVERY note about to be written, decide ONE of these classifications:
 ```yaml
 ---
 type: preference          # OR pattern, project-note, skill-learned (NOT decision — those don't decay)
-tags: [preferences, org]
+tags: [preferences, YourCo]
 inferred: true
 confidence: 0.85          # 0.0–1.0 starting confidence; default 0.85 for new inferences
 asserted_at: 2026-04-30   # today, ISO date — when first inferred
@@ -612,8 +612,8 @@ For EVERY note about to be written, ask these THREE questions in order:
 ---
 edges:
   supersedes:    ["[[Old-Auth-Pattern]]"]
-  contradicts:   ["[[the user-Likes-Verbose]]"]
-  supports:      ["[[the user-Voice-Profile]]"]
+  contradicts:   ["[[Brian-Likes-Verbose]]"]
+  supports:      ["[[Brian-Voice-Profile]]"]
   derived_from:  ["[[2026-04-29-Email-Thread]]"]
 ---
 ```
@@ -628,57 +628,29 @@ edges:
 
 **BULLETPROOF ENFORCEMENT:** Every note's tags are validated against the whitelist BEFORE writing. Invalid tags cause REJECTION (not warning). No exceptions.
 
-**Load Whitelist (with graceful bootstrap):**
-
-`session/tag-whitelist.json` is NOT a hard dependency. If the file is absent, bootstrap it
-with a default whitelist BEFORE validating — treat a missing file as "seed defaults", never
-as a block. The default `folders` list mirrors the `valid_prefixes` used by
-`validate_note_path()` (lower-cased), so folder tags and physical vault subfolders stay in
-sync — **including `agents`**.
-
+**Bootstrap fallback (v1.1 fix, 2026-07-01 — closes a gap found in live-execution testing):** `session/tag-whitelist.json` is session-runtime state, not a repo-tracked file — it will not exist on a fresh session or a fresh machine. "No exceptions" cannot mean "fail closed and block all memory writes when the whitelist itself is missing." If the file doesn't exist, bootstrap it before validating, mirroring the existing `session_id` graceful-recovery pattern (§1 above):
 ```python
-import json
-import os
-from datetime import datetime
+import json, os
 
-def load_tag_whitelist(whitelist_path="session/tag-whitelist.json"):
-    """
-    Load the tag whitelist, bootstrapping a default if the file is missing.
+WHITELIST_PATH = "session/tag-whitelist.json"
+DEFAULT_WHITELIST = {
+    "folders": ["decisions", "patterns", "preferences", "skills-learned",
+                "projects", "sops", "archive", "incidents", "agents"],
+    "software": ["PSA tool", "CRM", "product catalog tool", "BIM tool", "android",
+                 "git", "netlify", "playwright", "supabase", "gas",
+                 "python", "memory-system", "enforcement", "leroy"],
+    "max_tags": 4,
+    "require_folder_first": True
+}
 
-    A missing whitelist file is a recoverable condition, not a failure: seed a
-    sensible default and continue. `folders` mirrors validate_note_path()'s
-    valid_prefixes (decisions/patterns/preferences/skills-learned/projects/
-    error-solutions/sops/archive/incidents/agents) so tags and vault subfolders
-    never drift apart.
-    """
-    if not os.path.exists(whitelist_path):
-        default_whitelist = {
-            "folders": [
-                "decisions", "patterns", "preferences", "skills-learned",
-                "projects", "error-solutions", "sops", "archive",
-                "incidents", "agents"
-            ],
-            "software": [
-                "memory-system", "enforcement", "git", "python",
-                "javascript", "typescript", "api", "database",
-                "testing", "ci-cd", "docs", "workflow"
-            ],
-            "max_tags": 4,
-            "require_folder_first": True,
-            "version": "bootstrap-1.0",
-            "bootstrapped_at": datetime.utcnow().isoformat() + "Z"
-        }
-        os.makedirs(os.path.dirname(whitelist_path) or ".", exist_ok=True)
-        with open(whitelist_path, "w") as f:
-            json.dump(default_whitelist, f, indent=2)
-        print(f"[WHITELIST] Bootstrapped default tag-whitelist.json at {whitelist_path}")
-        return default_whitelist
+if not os.path.exists(WHITELIST_PATH):
+    with open(WHITELIST_PATH, "w") as f:
+        json.dump(DEFAULT_WHITELIST, f, indent=2)
+    print("[MEMORY] tag-whitelist.json was missing — bootstrapped with defaults")
 
-    with open(whitelist_path) as f:
-        return json.load(f)
-
-whitelist = load_tag_whitelist()
+whitelist = json.load(open(WHITELIST_PATH))
 ```
+Note `"agents"` is included in `folders` here to match the `Agents/` vault prefix added to `valid_prefixes` above — without it, a journal note tagged `[agents, memory-system]` would fail folder-tag validation even though its PATH is valid.
 
 **Validation Function (MANDATORY):**
 ```python
@@ -694,8 +666,9 @@ def validate_memory_tags(tags, note_title, whitelist_path="session/tag-whitelist
     Returns:
         (is_valid: bool, error_msg: str)
     """
-    # Load whitelist — bootstraps a default if the file is absent (never a block)
-    whitelist = load_tag_whitelist(whitelist_path)
+    # Load whitelist
+    with open(whitelist_path) as f:
+        whitelist = json.load(f)
 
     folder_tags = whitelist['folders']
     software_tags = whitelist['software']
@@ -771,7 +744,7 @@ for note in notes_to_write:
     # VALID - Proceed with write
     write_note_to_vault(note)
 
-    # ALSO persist to MCP cross-session memory (memory integration v1.0)
+    # ALSO persist to MCP cross-session memory (YourCo-memory integration v1.0)
     # Maps vault folder tag → MCP memory type
     _type_map = {
         "decisions":     "decision",
@@ -787,7 +760,7 @@ for note in notes_to_write:
     _mcp_content = f"{note.title}: {note.summary or note.content[:300]}"
     _mcp_tags    = ",".join(tags)
 
-    mcp__memory__remember(
+    mcp__hmb-memory__remember(
         content    = _mcp_content,
         type       = _mem_type,
         tags       = _mcp_tags,
@@ -816,7 +789,7 @@ for note in notes_to_write:
 **REJECTED - Invalid software tag:**
 ```
 [MEMORY REJECTED] Protocol Enforcement v5.2
-  Error: Invalid software tag 'v5.2'. Valid tags: ['ticketing', 'crm', ...]
+  Error: Invalid software tag 'v5.2'. Valid tags: ['PSA tool', 'CRM', ...]
   Tags attempted: ['decisions', 'v5.2']
   Logged to: session/memory-rejections.log
 ```
@@ -825,7 +798,7 @@ for note in notes_to_write:
 ```
 [MEMORY REJECTED] Memory System Update
   Error: Too many tags (5). Max 4 allowed
-  Tags attempted: ['patterns', 'memory-system', 'enforcement', 'crm', 'extra']
+  Tags attempted: ['patterns', 'memory-system', 'enforcement', 'CRM', 'extra']
   Logged to: session/memory-rejections.log
 ```
 
@@ -847,7 +820,7 @@ for note in notes_to_write:
 ```
 2026-01-16T10:30:00Z | ['automation', 'workflow'] | First tag 'automation' must be a folder tag | Automation Workflow Pattern
 2026-01-16T10:30:05Z | ['decisions', 'v5.2'] | Invalid software tag 'v5.2' | Protocol Enforcement v5.2
-2026-01-16T10:30:10Z | ['patterns', 'memory', 'enforcement', 'crm', 'extra'] | Too many tags (5). Max 4 allowed | Memory System Update
+2026-01-16T10:30:10Z | ['patterns', 'memory', 'enforcement', 'CRM', 'extra'] | Too many tags (5). Max 4 allowed | Memory System Update
 ```
 
 **Whitelist Management:**
@@ -1151,7 +1124,7 @@ for note in notes_to_write:
 ```markdown
 ## Context
 Learned this while debugging <private>client API key: sk-abc123xyz</private>
-authentication issues with the your CRM integration.
+authentication issues with the CRM integration.
 
 ## Details
 The endpoint requires <private>Authorization: Bearer SECRET_TOKEN</private>
@@ -1162,7 +1135,7 @@ but works with standard OAuth flow.
 ```markdown
 ## Context
 Learned this while debugging [REDACTED]
-authentication issues with the your CRM integration.
+authentication issues with the CRM integration.
 
 ## Details
 The endpoint requires [REDACTED]
@@ -1200,7 +1173,7 @@ Understanding WHY a decision was made is often more valuable than the decision i
 **New Frontmatter Fields (OPTIONAL - backwards compatible):**
 ```yaml
 causality:
-  preceded_by: "Working on your CRM pagination, hitting 200 record limit"
+  preceded_by: "Working on CRM pagination, hitting 200 record limit"
   trigger: "API returning incomplete data, user complained about missing deals"
   followed_by: "Implemented pageSize: 1000 across all queries, verified complete data"
   outcome: "success"  # success | partial | failed | unknown
@@ -1338,20 +1311,20 @@ for note in notes_to_write:
 ---
 created: 2026-01-15T14:30:00Z
 modified: 2026-01-15T14:30:00Z
-project: partner
-domain: crm
+project: PartnerCo
+domain: CRM
 type: decision
-tags: [decisions, crm]
+tags: [decisions, CRM]
 causality:
   preceded_by: "Working on deal sync, noticing missing records"
   trigger: "API returning only 200 deals instead of expected 450"
   followed_by: "Implemented pageSize: 200 with pagination loop"
   outcome: success
-session: Fixing your CRM pagination for complete deal extraction
-session_id: crm-sync-jan-15
+session: Fixing CRM pagination for complete deal extraction
+session_id: CRM-sync-jan-15
 ---
 
-# your CRM Pagination Protocol
+# CRM Pagination Protocol
 
 ## Context
 During deal synchronization, discovered API was truncating results...
@@ -1360,11 +1333,11 @@ During deal synchronization, discovered API was truncating results...
 **Recall Enhancement:**
 When displaying notes with causality, include the context:
 ```markdown
-3. **your CRM Pagination Protocol** (Decision, 2026-01-15) ~650
+3. **CRM Pagination Protocol** (Decision, 2026-01-15) ~650
    API pagination fix for complete data extraction.
    Trigger: API returning only 200 deals instead of expected 450
    Outcome: ✅ success
-   File: Decisions/your CRM-Pagination-Protocol.md
+   File: Decisions/CRM-Pagination-Protocol.md
 ```
 
 **Backwards Compatibility:**
@@ -1393,8 +1366,8 @@ This prevents memory contamination between parallel chat sessions.
 ---
 created: YYYY-MM-DDTHH:MM:SSZ
 modified: YYYY-MM-DDTHH:MM:SSZ
-project: {meta|partner|org|lms}
-domain: {ticketing|crm|memory-system|bim|android|etc}
+project: {meta|PartnerCo|YourCo|University}
+domain: {PSA tool|CRM|memory-system|BIM tool|android|etc}
 type: {decision|pattern|preference|skill-learned|project-note|error-solution}
 tags: [{folder-tag}, {software-tag-1}, {software-tag-2}]
 related:
@@ -1403,7 +1376,7 @@ related:
   - "[[Related Note 2]]"
 session: {task description}
 session_id: {session identifier from state.json - e.g. "protocol-enforcement-v5"}
-session_window: {user-friendly label - e.g. "your organization main", "an LMS grading", "your org dev"}
+session_window: {user-friendly label - e.g. "PartnerCo main", "University grading", "YourCo dev"}
 consolidated_at: YYYY-MM-DDTHH:MM:SSZ
 
 # OPTIONAL: Causality context (v6.0 - auto-extracted if detectable)
@@ -1479,13 +1452,13 @@ def generate_wikilinks_mandatory(note_data, memory_index):
     hub_map = {
         'memory-system': 'HUB - Memory System',
         'enforcement': 'HUB - Protocol Enforcement',
-        'ticketing': 'HUB - your CRM Integration',
-        'crm': 'HUB - your CRM Integration',
+        'PSA tool': 'HUB - PSA tool Integration',
+        'CRM': 'HUB - CRM Integration',
         'leroy': 'HUB - LeRoy Reports',
-        'bim': 'HUB - BIM',
+        'BIM tool': 'HUB - BIM tool BIM',
         'android': 'HUB - Android Development',
         'git': 'HUB - Git Workflow',
-        'catalog': 'HUB - your catalog service Integration',
+        'product catalog tool': 'HUB - product catalog tool Integration',
     }
     hub_name = hub_map.get(domain)
     if hub_name:
@@ -1579,13 +1552,13 @@ def generate_wikilinks_mandatory(note_data, memory_index):
 |--------|----------|
 | memory-system | `[[HUB - Memory System]]` |
 | enforcement | `[[HUB - Protocol Enforcement]]` |
-| ticketing | `[[HUB - your CRM Integration]]` |
-| crm | `[[HUB - your CRM Integration]]` |
+| PSA tool | `[[HUB - PSA tool Integration]]` |
+| CRM | `[[HUB - CRM Integration]]` |
 | leroy | `[[HUB - LeRoy Reports]]` |
-| bim | `[[HUB - BIM]]` |
+| BIM tool | `[[HUB - BIM tool BIM]]` |
 | android | `[[HUB - Android Development]]` |
 | git | `[[HUB - Git Workflow]]` |
-| catalog | `[[HUB - your catalog service Integration]]` |
+| product catalog tool | `[[HUB - product catalog tool Integration]]` |
 | general | `[[HUB - Claude System]]` (fallback) |
 
 **Integration into Consolidation Flow:**
@@ -1836,13 +1809,13 @@ The consolidation system now calls `generate_wikilinks_mandatory()` BEFORE writi
 **Required Properties (NEVER omit - v2.2 with Multi-Session Tracking):**
 - `created`: ISO 8601 timestamp when note was created
 - `modified`: ISO 8601 timestamp (same as created initially)
-- `project`: One of [meta, partner, org, lms]
-- `domain`: Specific domain (ticketing, crm, memory-system, bim, android, etc.)
+- `project`: One of [meta, PartnerCo, YourCo, University]
+- `domain`: Specific domain (PSA tool, CRM, memory-system, BIM tool, android, etc.)
 - `type`: One of [decision, pattern, preference, skill-learned, project-note]
 - `tags`: Array following STRICT TAG RULES (see below)
 - `session`: Brief description of the task/session context
 - `session_id`: Read from `state.json` → `session_id` field (e.g., "protocol-enforcement-v5")
-- `session_window`: Read from `state.json` → `session_window` field OR infer from project (e.g., "your organization main")
+- `session_window`: Read from `state.json` → `session_window` field OR infer from project (e.g., "PartnerCo main")
 - `consolidated_at`: ISO 8601 timestamp when consolidation executed (NOW)
 
 ### STRICT TAG RULES v2.1 (HARD CONSTRAINTS)
@@ -1853,14 +1826,14 @@ The consolidation system now calls `generate_wikilinks_mandatory()` BEFORE writi
 - `decisions` | `patterns` | `preferences` | `skills-learned` | `sops` | `projects`
 
 **Tags 2-4 (OPTIONAL):** Software/integration tags ONLY
-- `ticketing` | `crm` | `catalog` | `bim` | `android`
+- `PSA tool` | `CRM` | `product catalog tool` | `BIM tool` | `android`
 - `git` | `netlify` | `playwright` | `supabase` | `gas`
 - `python` | `memory-system` | `enforcement` | `leroy`
 
 **FOR INTEGRATIONS/ SUBFOLDER (OPTION 1 - Meaningful Context):**
 
 **Tag 1:** `integrations` (always)
-**Tag 2:** Software name (`ticketing` | `crm` | `catalog` | `products`)
+**Tag 2:** Software name (`PSA tool` | `CRM` | `product catalog tool` | `products`)
 **Tag 3:** Meaningful context from folder path
 
 | Folder Path | Context Tag |
@@ -1886,21 +1859,21 @@ The consolidation system now calls `generate_wikilinks_mandatory()` BEFORE writi
 **Examples:**
 ```yaml
 # Claude/ files - CORRECT:
-tags: [decisions, ticketing, crm]
+tags: [decisions, PSA tool, CRM]
 tags: [patterns, memory-system]
-tags: [skills-learned, leroy, ticketing]
+tags: [skills-learned, leroy, PSA tool]
 
 # Integrations/ files - CORRECT:
-tags: [integrations, ticketing, company]      # company/companies/*.md
-tags: [integrations, ticketing, tickets]       # service-desk/tickets/*.md
-tags: [integrations, ticketing, opportunities] # sales/opportunities/*.md
-tags: [integrations, crm]                    # crm/*.md (shallow path, no 3rd tag)
+tags: [integrations, PSA tool, company]      # company/companies/*.md
+tags: [integrations, PSA tool, tickets]       # service-desk/tickets/*.md
+tags: [integrations, PSA tool, opportunities] # sales/opportunities/*.md
+tags: [integrations, CRM]                    # CRM/*.md (shallow path, no 3rd tag)
 
 # INCORRECT:
 tags: [hooks, enforcement, meta-architecture, bulletproof]  # No folder, invalid types
 tags: []  # Missing required folder tag
 tags: [decisions, v5.2, automation]  # Invalid version and action tags
-tags: [integrations, ticketing]  # Missing context tag for deep path
+tags: [integrations, PSA tool]  # Missing context tag for deep path
 ```
 
 **INVALID TAGS (NEVER USE):**
@@ -2066,17 +2039,17 @@ workflow_metadata:
 
   # Tool sequence
   tools_used:
-    - mcp__crm__crm_tool
-    - mcp__crm__list_deals
+    - mcp__hubspot__hubspot_search_deals
+    - mcp__hubspot__hubspot_list_deals
 
   # Data sources (unique)
   data_sources:
-    - crm
+    - CRM
 
   # Output specification
   output:
     format: markdown | json | csv | excel
-    recipients: ["you@example.com"]
+    recipients: ["team@example.com"]
     delivery_method: email | file | console
 
   # Suggestion tracking
@@ -2093,7 +2066,7 @@ workflow_metadata:
 - **automation_threshold**: Simple=2, Medium=3, Complex=5
 - **parameters**: Extracted from conversation context (quarter, year, date range, etc.)
 - **tools_used**: List of MCP tool names in execution order
-- **data_sources**: Unique sources (crm, ticketing, supabase, etc.)
+- **data_sources**: Unique sources (CRM, PSA tool, supabase, etc.)
 
 **Workflow Catalog Update (MANDATORY for workflow patterns):**
 
@@ -2180,7 +2153,7 @@ def rebuild_index_from_vault():
     Used when index is corrupted or missing.
     Returns new index structure.
     """
-    vault_path = "~/Projects\\memory\\"
+    vault_path = "~\\StudioProjects\\LeRoy_Memory\\"
     index = {
         "version": "2.0",
         "total_notes": 0,
@@ -2285,7 +2258,7 @@ if notes_written:
     from deadline_calendar_automation import process_deadline_notes
 
     # Load calendar MCP tool (MANDATORY FIRST)
-    MCPSearch(query="select:mcp__email-primary__calendar_createEvent")
+    MCPSearch(query="select:mcp__google-hmb__calendar_createEvent")
 
     # Create calendar events for deadline notes
     events_created = process_deadline_notes(notes_written, state)
@@ -2379,30 +2352,30 @@ def detect_project(session_data, notes_written):
     # Check cwd path first
     if 'leroy' in cwd or 'leroy-swarm' in cwd:
         return 'LeRoy'
-    if 'product' in cwd:
-        return 'your product'
-    if 'exampleclient' in cwd:
+    if 'unicast' in cwd:
+        return 'UniCast'
+    if 'ExampleClient' in cwd:
         return 'ExampleClient'
-    if 'exampleclient' in cwd:
-        return 'ExampleClient'
-    if 'partner' in cwd:
-        return 'your organization'
-    if 'exampleclient' in cwd:
+    if 'descco' in cwd:
+        return 'Descco'
+    if 'PartnerCo' in cwd:
+        return 'PartnerCo'
+    if 'ExampleClient' in cwd:
         return 'ExampleClient'
 
     # Check name/summary
     text = f"{name} {summary}"
     if 'leroy' in text:
         return 'LeRoy'
-    if 'product' in text or 'bim' in text:
-        return 'your product'
-    if 'exampleclient' in text:
+    if 'unicast' in text or 'BIM tool' in text:
+        return 'UniCast'
+    if 'ExampleClient' in text:
         return 'ExampleClient'
-    if 'exampleclient' in text:
-        return 'ExampleClient'
-    if 'partner' in text:
-        return 'your organization'
-    if 'exampleclient' in text:
+    if 'descco' in text:
+        return 'Descco'
+    if 'PartnerCo' in text:
+        return 'PartnerCo'
+    if 'ExampleClient' in text:
         return 'ExampleClient'
 
     # Check note tags
@@ -2416,12 +2389,12 @@ def detect_project(session_data, notes_written):
                     tags = tags_line[0].lower()
                     if 'leroy' in tags:
                         return 'LeRoy'
-                    if 'product' in tags or 'bim' in tags:
-                        return 'your product'
-                    if 'exampleclient' in tags:
+                    if 'unicast' in tags or 'BIM tool' in tags:
+                        return 'UniCast'
+                    if 'ExampleClient' in tags:
                         return 'ExampleClient'
-                    if 'exampleclient' in tags:
-                        return 'ExampleClient'
+                    if 'descco' in tags:
+                        return 'Descco'
 
     # Default to Meta
     return 'Meta'
@@ -2667,7 +2640,7 @@ See `scripts/generate-session-note.py` for full template implementation.
     "notes_created": 3,
     "notes_created_this_session": 22,  // Running total - RESET on new session_id
     "last_session_id": "protocol-enforcement-v5",  // v2.7: Tracks last session
-    "vault_path": "memory/",
+    "vault_path": "LeRoy_Memory/",
     "last_email_sent": "ISO timestamp",
     "email_send_count": 5,
     "last_email_status": "success"
@@ -2732,7 +2705,7 @@ def send_memory_notification_email(notes_written, state, index):
         bool: True if email sent successfully, False otherwise
     """
     # STEP 1: Load MCP tool (MANDATORY FIRST)
-    # Must use MCPSearch to load: select:mcp__email-primary__send_gmail_message
+    # Must use MCPSearch to load: select:mcp__google-hmb__send_gmail_message
     # This MUST happen BEFORE calling this function (in consolidation main flow)
 
     # STEP 2: Build email body
@@ -2840,9 +2813,9 @@ def send_memory_notification_email(notes_written, state, index):
 
     # STEP 6: Send email via MCP
     try:
-        # Call mcp__email-primary__send_gmail_message
+        # Call mcp__google-hmb__send_gmail_message
         # NOTE: MCPSearch MUST have been called before this function
-        result = mcp__email-primary__send_gmail_message(
+        result = mcp__google_hmb__send_gmail_message(
             user_google_email="you@example.com",
             to="you@example.com",
             subject=subject,
@@ -2876,7 +2849,7 @@ def send_memory_notification_email(notes_written, state, index):
 # INTEGRATION POINT: Call after writing notes and updating index
 if notes_written:
     # CRITICAL: Load MCP tool FIRST using MCPSearch
-    # MCPSearch(query="select:mcp__email-primary__send_gmail_message")
+    # MCPSearch(query="select:mcp__google-hmb__send_gmail_message")
 
     # Send notification email
     email_sent = send_memory_notification_email(notes_written, state, index)
@@ -2897,9 +2870,9 @@ Subject: [MEMORY] 3 New Notes Added - 2026-01-14 21:45
   Tags: [decisions, enforcement, memory-system]
   Context: Implemented user-friendly priority system for enforcement queue
 
-• Pattern: your CRM Query Optimization
-  Path: Claude/Patterns/your CRM-Query-Optimization.md
-  Tags: [patterns, ticketing]
+• Pattern: PSA tool Query Optimization
+  Path: Claude/Patterns/PSA tool-Query-Optimization.md
+  Tags: [patterns, PSA tool]
   Context: Using OR conditions to consolidate multiple API calls
 
 • Skill-Learned: Auto-Wikilink Generation
@@ -2914,7 +2887,7 @@ Consolidation timestamp: 2026-01-14T21:45:00Z
 
 Tag Summary:
 • Folder tags used: decisions, patterns, skills-learned
-• Software tags used: ticketing, enforcement, memory-system
+• Software tags used: PSA tool, enforcement, memory-system
 ```
 
 **When to send:**
@@ -2944,7 +2917,7 @@ Updates `state.json` with:
 
 **MINIMAL OUTPUT - Email sent instead:**
 ```
-[MEMORY] {N} notes saved → emailed report to you@example.com
+[MEMORY] {N} notes saved → emailed report to team@example.com
 ```
 
 That's it. User gets full details via email, not in conversation.
@@ -3028,7 +3001,7 @@ if notes_written:
 - Voice patterns learned from corpus → Applied to ALL communication
 - USER.md loaded at session start → Claude's conversational style adapts
 - Daily analysis → Daily relay → Progressive voice matching
-- the user hears his own voice coming back in every conversation
+- Brian hears his own voice coming back in every conversation
 
 **OUTPUT:**
 ```
@@ -3182,12 +3155,12 @@ NEXT PROMPT:
 ## PROJECT CONFIGURATION (v3.0 - UNIFIED MEMORY)
 
 **NOTE:** As of v3.0, all projects share a unified memory vault. No blacklisting is applied.
-The previous your organization-only restriction (v2.8) has been removed to support multi-project workflows.
+The previous PartnerCo-only restriction (v2.8) has been removed to support multi-project workflows.
 
 **Supported Projects:**
-- `partner` - your organization Security (your CRM, your catalog service, Android)
-- `org` - your org / ExampleClient (your BIM tool, your product, BIM)
-- `lms` - an LMS courses (LMS, education)
+- `PartnerCo` - PartnerCo Security (CRM, PSA tool, product catalog tool, Android)
+- `YourCo` - YourCo / ExampleClient (BIM tool, UniCast, BIM)
+- `University` - University courses (University, education)
 - `meta` - Claude system patterns and skills
 
 **Supported Domains:**
@@ -3195,9 +3168,9 @@ The previous your organization-only restriction (v2.8) has been removed to suppo
 - Sharding separates notes by project for efficient loading
 
 **Migration Note (2026-01-23):**
-The blacklist was removed because your org/an LMS workflows are now active projects
-requiring memory persistence. your product documentation and your BIM tool BIM knowledge
-are critical for the your org consulting practice.
+The blacklist was removed because YourCo/University workflows are now active projects
+requiring memory persistence. UniCast documentation and BIM tool BIM knowledge
+are critical for the YourCo consulting practice.
 
 ## What Gets Saved
 
@@ -3210,7 +3183,7 @@ are critical for the your org consulting practice.
 | **SOP** | Standard Operating Procedure documented | `SOPs/{project}/` |
 | **Project** | Project-specific learning | `Projects/{project}/` |
 
-**All active projects (your organization, your org, an LMS, meta)**
+**All active projects (PartnerCo, YourCo, University, meta)**
 
 ## What Gets Ignored
 
@@ -3240,7 +3213,7 @@ If note already exists:
 
 **Calls:**
 - Obsidian filesystem (direct Write to vault)
-- `mcp__email-primary__send_gmail_message` (email notifications)
+- `mcp__google-hmb__send_gmail_message` (email notifications)
 - **MUST load MCP tool with MCPSearch before calling**
 
 ## Maintenance
