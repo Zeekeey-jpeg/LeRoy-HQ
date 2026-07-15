@@ -24,8 +24,22 @@
 <p align="center">
   <a href="#-choose-your-path">Install</a> ·
   <a href="#-the-org-chart--27-agents-5-tiers">Architecture</a> ·
-  <a href="docs/">Docs</a>
+  <a href="docs/">Docs</a> ·
+  <a href="#-recent-updates">Recent Updates</a>
 </p>
+
+---
+
+## 📰 Recent Updates
+
+*A living log so you can see the system is actively growing, not a one-time drop.*
+
+**2026-07-15 — Smart Todos gained a backstory layer**
+The built-in todo skill now supports an optional second layer per task: a linked paper-trail
+file (who asked, correspondence history, decisions, what's left) for the items worth
+remembering the "why" on weeks later — while everyday items stay a one-line row. Paired with
+an explicit memory-push-and-verify step, so a written note is actually retrievable later, not
+just sitting on disk unindexed. See [`skills/routines/smart-todos.md`](skills/routines/smart-todos.md).
 
 ---
 

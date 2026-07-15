@@ -20,7 +20,6 @@ Skills about managing skills, permissions, disambiguation, and universal pattern
 | memory hierarchy, tier system, priority loading | memory-hierarchy-implementation.md |
 | memory overview, memory system, vault architecture | memory-system-overview.md |
 | position zero, enforcement position, pre-gate execution | position-zero-enforcement.md |
-| predictive todo, smart todo, context-aware tasks | predictive-todo-system.md |
 | secretary auto, action tracking, timeline logging | secretary-auto-tracking.md |
 | session gate, gate protocol, enforce routing, first action | session-gate.md |
 | skill reference validator, dead links, skill verification | skill-reference-validator.md |
@@ -80,7 +79,7 @@ Skills about managing skills, permissions, disambiguation, and universal pattern
 | deadline calendar, auto calendar, deadline to event | deadline-calendar-automation.md |
 | skill composer, auto skill, simple skill, quick skill | skill-composer.md |
 | kb ingestion, data dump, integrate docs, parse knowledge | kb-auto-ingestion-protocol.md |
-| debate, council debate, decide, dilemma, torn between, should I | debate-by-council.md |
+| debate, council debate, decide, dilemma, torn between, should I | debate-by-brian.md |
 
 ## Available Skills
 
@@ -135,7 +134,6 @@ Skills about managing skills, permissions, disambiguation, and universal pattern
 - **auto-health-monitor.md** - Background system health monitoring, self-healing protocols
 - **system-health-check.md** - System diagnostic scans, health checks, component verification
 - **token-goal-management.md** - Efficiency targets, burn rate tracking, token budget management
-- **predictive-todo-system.md** - Context-aware todo generation, smart task tracking
 
 ### Memory System
 - **memory-consolidation.md** - Checkpoint → Obsidian writes, auto-triggered consolidation, workflow_metadata support
@@ -177,3 +175,6 @@ Skills about managing skills, permissions, disambiguation, and universal pattern
 - [fork-dispatch.md](fork-dispatch.md) — Fork dispatch pattern for parallel agent work
 - [pii-pre-send.md](pii-pre-send.md) — PII detection guard for outbound Gmail/Telegram
 - [quick-trigger-registry.md](quick-trigger-registry.md) — Complete quick-trigger table
+
+## Archived (2026-07-15)
+- **predictive-todo-system.md** → moved to `skills/_archive/`. Mostly-unbuilt design doc (Phases 2-4 marked pending), unwired to any live trigger. Superseded in spirit by `skills/routines/smart-todos.md` (live, single source of truth for the personal/YourCo mixed todo list). See `memory/Projects/Personal/index.md` for the live system.

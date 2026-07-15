@@ -1,13 +1,18 @@
 ---
 name: smart-todos
-description: Dispatch skill for personal smart-todo system. Handles list/add/done/kill/defer/verdict triggers. Renders top-3 for morning, full list on demand. Reads memory/Projects/Personal/.
+description: Dispatch skill for personal smart-todo system. Handles list/add/done/kill/defer/bump/backstory/verdict triggers. Renders top-3 for morning, full board after every write, full list on demand. Reads memory/Projects/Personal/.
 context: load-on-trigger
 ---
 
 # Smart Todos — Dispatch Skill
 
 > Single source of truth for all todo operations. Triggered by quick-trigger keywords in CLAUDE.md.
-> Built 2026-04-27 from "Debate by the user" verdict. the user's spec: mixed personal+your org, decay 7/21/30, on-demand only (no Notion mirror).
+> Built 2026-04-27 from "Debate by you" verdict. your spec: mixed personal+YourCo, decay 7/21/30, on-demand only (no Notion mirror).
+>
+> **v2.0 (2026-07-15):** Added Layer B backstory paper-trail + RAG push (from "To-Do System with
+> Backstory + RAG" spec, email 2026-07-15). See Action 6 below and `memory/Projects/Personal/backstory/README.md`.
+> Write confirmations now render the full board (Action 1 LIST logic, reused) instead of a single row —
+> this does NOT change the morning kindness rule (top-3 only), which is a separate trigger untouched by this update.
 
 ---
 
@@ -28,16 +33,18 @@ context: load-on-trigger
 |-----------|--------|--------|
 | `todo list`, `smart todos`, `what's on my plate`, `what's on my todo`, `todo` | List action | Render full list, stale flagged |
 | `personal todos` | List action (filtered) | Domain=personal only |
-| `org todos` | List action (filtered) | Domain=org only |
+| `YourCo todos` | List action (filtered) | Domain=YourCo only |
 | `verdict needed`, `stale todos` | List action (filtered) | Status=verdict OR age >30d |
 | `add todo {text}` | Add action | Append row, confirm with new ID |
 | `add personal todo {text}` | Add action | Append with domain=personal |
-| `add org todo {text}` | Add action | Append with domain=org |
+| `add YourCo todo {text}` | Add action | Append with domain=YourCo |
 | `done {id}` | Resolve action | Move to archive (resolution=done) |
 | `kill {id}` | Resolve action | Move to archive (resolution=killed) |
 | `defer {id} {date}` | Mutate action | Update due, reset created (freshness reset) |
 | `bump {id} {priority}` | Mutate action | Change priority (P0/P1/P2) |
 | `today is low energy` / `today is high energy` | Session override | Set morning_energy for this session |
+| `backstory {id}`, `tell me about {id}`, `what's the story on {id}` | Backstory read action | Narrate paper-trail from `backstory/T{id}.md` + recall cross-check |
+| `backstory {id} {pasted text}`, or pasted correspondence alongside `add todo` | Backstory write action | Extract task row AND backstory file from the same text, same response |
 
 ---
 
@@ -118,19 +125,31 @@ Quick actions:  done T###  |  defer T### {date}  |  add todo {text}
    - `P0` / `P1` / `P2` → priority
    - `due tomorrow` / `due Friday` / `due 2026-05-04` → due date (resolve via system date)
    - `low energy` / `high energy` / `med energy` → energy
-   - `personal` / `org` → domain (or use trigger variant)
+   - `personal` / `YourCo` → domain (or use trigger variant)
+   - Requestor name mentioned explicitly (e.g. "Jim asked me to...") → `Who Asked`; otherwise `Self`.
+     If genuinely ambiguous whether it's your own item or someone else's ask, do NOT guess — set
+     `Who Asked: ⚠️ unclear` and say so in the confirmation.
 2. Read frontmatter `next_id` from `smart-todos.md`
-3. Build new row with defaults: P2 / med energy / no due / domain from trigger or `personal`
+3. Build new row with defaults: P2 / med energy / no due / domain from trigger or `personal` / `Who Asked: Self` / `Backstory: No`
 4. Insert row before example rows OR at table bottom if no examples remain
 5. Bump `next_id` in frontmatter
 6. Update `last_updated` in frontmatter
-7. Confirm to user with new ID
+7. **Conversation-extraction rule:** if the user pasted raw correspondence (email thread, Slack/Teams
+   copy-paste, meeting notes) alongside the add request, do NOT just extract a one-line title — also
+   create the backstory file in the same response (see Action 6 WRITE flow). Never ask the user to
+   split this into two separate requests. This is still a manual, user-triggered action (pasting text
+   into chat) — it does not conflict with the "no auto-create from inbox" scope boundary below.
+8. Confirm to user with new ID, then render the full current board (reuse Action 1 LIST logic, all
+   domains, no filter) per the v2.0 show-after-write rule.
 
 **Confirmation format:**
 ```
 ✅ Added T### — "{title}"
-   P{N} | {domain} | {energy} energy | due {date or 'whenever'}
+   P{N} | {domain} | {energy} energy | due {date or 'whenever'} | Who Asked: {name or Self}
    Score: {N} (rank: top {K} of {total})
+   {IF backstory created}Backstory: [[T###]] created — {N} correspondence entries captured{END IF}
+
+{full board render — same format as `todo list`}
 ```
 
 ---
@@ -151,6 +170,9 @@ Quick actions:  done T###  |  defer T### {date}  |  add todo {text}
 ```
 ✅ T### archived — resolution={done|killed}
    Was open {N} days. Archive total: {N} items.
+   {IF had backstory}Backstory file kept at backstory/T###.md (not deleted — archival record){END IF}
+
+{full board render — same format as `todo list`}
 ```
 
 ---
@@ -168,6 +190,8 @@ Quick actions:  done T###  |  defer T### {date}  |  add todo {text}
 ```
 ✅ T### deferred to {new_date} — freshness clock reset.
    Score: {old} → {new}
+
+{full board render — same format as `todo list`}
 ```
 
 If `defer` pushes the date >180 days out: ask user "this is essentially a kill — confirm defer-out?" before moving to archive with resolution=`deferred-out`.
@@ -176,7 +200,70 @@ If `defer` pushes the date >180 days out: ask user "this is essentially a kill �
 
 ## Action 5: BUMP (priority change)
 
-Find row, update Priority field, recompute score, confirm.
+Find row, update Priority field, recompute score, confirm, then render the full board (same v2.0 rule as ADD/DONE/KILL/DEFER).
+
+---
+
+## Action 6: BACKSTORY (v2.0, 2026-07-15)
+
+Full spec: `memory/Projects/Personal/backstory/README.md`. Two sub-actions:
+
+### READ — `backstory {id}` / `tell me about {id}` / `what's the story on {id}`
+
+1. Find the row by ID in `smart-todos.md`. If `Backstory: No`, tell the user none exists and offer
+   to start one (`backstory {id} {text}`) — do not fabricate history.
+2. If `Backstory: Yes → [[T{id}]]`, read `backstory/T{id}.md`.
+3. Cross-check with `mcp__hmb-memory__recall(query="{task title keywords}", limit=3)` — surface if
+   the vault file and the recall entry disagree (recall entry stale, or vice versa).
+4. **Narrate in plain language** — who asked, what's the current state, key decisions, what's left.
+   Never dump the raw markdown file at the user.
+
+**Narration format:**
+```
+📋 T{id} — {title}
+   Who: {who_asked} | Status: {status} | Opened: {created}
+
+{2-4 sentence plain-language summary: snapshot + why it exists + latest correspondence}
+
+What's left:
+- {unchecked items from "What's needed to complete"}
+
+Full file: backstory/T{id}.md
+```
+
+### WRITE — `backstory {id} {text}`, or pasted correspondence during `add todo`
+
+1. If no backstory file exists yet, create one from the template in `backstory/README.md`.
+   If one exists, **append** a new dated row to "Correspondence & History" — never overwrite the file.
+2. Extract from the pasted text: date/channel/who/summary (Correspondence & History row), any new
+   decisions, people, or systems mentioned, and any completed/remaining steps.
+3. Update `smart-todos.md`: set `Backstory: Yes → [[T{id}]]` on the row if this is the first backstory write.
+4. **RAG push (mandatory):**
+   ```python
+   mcp__hmb-memory__remember(
+       content=f"Task {id}: {title}. Latest: {latest_status_line}. Who: {who_asked}. Systems: {systems_in_play}.",
+       type="context",
+       tags=f"todo,{domain},{topic_tags}",
+       importance=6
+   )
+   ```
+5. **Verify — don't assume the push landed:**
+   ```python
+   mcp__hmb-memory__recall(query="{title keywords}", limit=3)
+   ```
+   If the new/updated entry isn't in the top 3, retry once with a more specific query. If it still
+   doesn't surface, log a one-line warning in the confirmation (`⚠️ RAG push unverified — retry recall
+   manually`) but do NOT block the todo write on this — the vault file is still the source of truth.
+6. Confirm to user, then render the full board (v2.0 rule).
+
+**Confirmation format:**
+```
+✅ Backstory {created|updated}: T### — "{title}"
+   {N} correspondence entries | Who: {who_asked}
+   RAG: pushed + verified ✅ (or ⚠️ unverified — see above)
+
+{full board render}
+```
 
 ---
 
@@ -230,15 +317,24 @@ Reply via the `mcp__plugin_telegram_telegram__reply` tool with chat_id from the 
 | Malformed table row | Skip row, log warning, continue with rest |
 | Date parse failure | Ask user to clarify with explicit YYYY-MM-DD |
 | Frontmatter corruption | Read fallback values: next_id=highest_in_table+1, last_updated=today |
+| `Who Asked` ambiguous | Never guess — set `⚠️ unclear`, surface it in the confirmation, resolve on next edit |
+| `backstory {id}` with no backstory file | Tell user none exists, offer to start one — don't fabricate history |
+| RAG push succeeds but recall doesn't surface it | Retry once with a narrower query; if still absent, warn (not block) and keep the vault file as source of truth |
 
 ---
 
 ## Out Of Scope (Explicitly)
 
-- Notion sync (the user declined — on-demand dispatch only)
-- Email integration (todos don't auto-create from inbox — stays manual)
+- Notion sync (you declined — on-demand dispatch only)
+- Email integration — **still stays manual.** The v2.0 conversation-extraction rule (Action 2 step 7,
+  Action 6 WRITE) only fires when you pastes text into a chat turn himself; nothing auto-scans the
+  inbox or auto-creates todos/backstories from it.
 - Calendar push (no auto-create calendar events from due dates — separate decision)
 - Recurring todos (use `session/one-off-reminders.json` or `schedule-registry.json` for recurring)
-- Subtasks / dependencies (kept flat by design — Skeptic's "no schema fancy")
+- Subtasks / dependencies (Layer A stays flat by design — Skeptic's "no schema fancy"; the backstory
+  layer's own checklist ("What's needed to complete") is the closest thing to sub-steps, and it lives
+  in Layer B, not as new Layer A schema)
+- Auto-completion detection from email/calendar evidence (this exists as a design in the archived-adjacent
+  `smart-todo-tracking.md` — deliberately not folded in here; noted as a possible future radar item, not built)
 
 If you want any of these later, the system is designed to extend without breaking. Add a column, add a trigger, ship.
