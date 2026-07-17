@@ -34,6 +34,16 @@
 
 *A living log so you can see the system is actively growing, not a one-time drop.*
 
+**2026-07-17 — LeRoy UI: a desktop app, if you'd rather click than type**
+LeRoy now has an optional visual desktop app alongside the terminal — same brain, same
+memory, just a windowed way in. You get your session tabs, the live org-chart globe, an
+inbox, and the Board Room where your executive agents debate and hand you decisions. The
+**Leroy CLI** stays the primary, fully-supported experience; **LeRoy UI** is a beta second
+door. It walks you through installing everything on first launch, and the Board Room ships
+**off by default** (it spends tokens on a schedule) — flip it on in one click when you want
+it, on the low-cost model. Windows installer rolling out on the
+[Releases page](https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases).
+
 **2026-07-15 — Smart Todos gained a backstory layer**
 The built-in todo skill now supports an optional second layer per task: a linked paper-trail
 file (who asked, correspondence history, decisions, what's left) for the items worth
