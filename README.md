@@ -1,6 +1,6 @@
 <!-- ============================================================= -->
 <!--  LEROY-HQ — README                                            -->
-<!--  A self-growing AI company that runs in your terminal.        -->
+<!--  A self-growing AI company you run as a desktop app.          -->
 <!-- ============================================================= -->
 
 <p align="center">
@@ -8,11 +8,11 @@
 </p>
 
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=22&pause=1000&color=2D6CDF&center=true&vCenter=true&width=780&lines=A+self-growing+AI+company+that+runs+in+your+terminal.;An+org+chart+of+agents.+One+shared+memory.;It+learns+how+you+work+and+gets+better+every+day." alt="typing" />
+  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&weight=600&size=22&pause=1000&color=2D6CDF&center=true&vCenter=true&width=780&lines=A+self-growing+AI+company+in+a+desktop+app.;An+org+chart+of+agents.+One+shared+memory.;It+learns+how+you+work+and+gets+better+every+day." alt="typing" />
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/interface-CLI%20first-080a0d?style=for-the-badge&logo=gnubash&logoColor=white" />
+  <img src="https://img.shields.io/badge/interface-Desktop%20app-2d6cdf?style=for-the-badge&logo=windowsterminal&logoColor=white" />
   <img src="https://img.shields.io/badge/platform-Windows-0078d6?style=for-the-badge&logo=windows&logoColor=white" />
   <img src="https://img.shields.io/badge/status-alpha-e09b2d?style=for-the-badge" />
   <img src="https://img.shields.io/badge/built%20on-Claude%20Code-2d6cdf?style=for-the-badge" />
@@ -22,7 +22,8 @@
 </p>
 
 <p align="center">
-  <a href="#-choose-your-path">Install</a> ·
+  <a href="#-download--install">Download</a> ·
+  <a href="#-leroy-ui">The app</a> ·
   <a href="#-the-org-chart--27-agents-5-tiers">Architecture</a> ·
   <a href="docs/">Docs</a> ·
   <a href="#-recent-updates">Recent Updates</a>
@@ -34,15 +35,15 @@
 
 *A living log so you can see the system is actively growing, not a one-time drop.*
 
-**2026-07-17 — LeRoy UI: a desktop app, if you'd rather click than type**
-LeRoy now has an optional visual desktop app alongside the terminal — same brain, same
-memory, just a windowed way in. You get your session tabs, the live org-chart globe, an
-inbox, and the Board Room where your executive agents debate and hand you decisions. The
-**Leroy CLI** stays the primary, fully-supported experience; **LeRoy UI** is a beta second
-door. It walks you through installing everything on first launch, and the Board Room ships
-**off by default** (it spends tokens on a schedule) — flip it on in one click when you want
-it, on the low-cost model. Windows installer rolling out on the
-[Releases page](https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases).
+**2026-07-17 — LeRoy is now a desktop app: download, open, done**
+LeRoy ships as a **Windows desktop app** — one download, no terminal required. You get session
+tabs, the live org-chart globe, an inbox, the Kanban triage board, and the Board Room where your
+executive agents debate and hand you decisions. It walks you through installing everything on
+first launch and builds your memory as you answer a few questions. The Board Room ships **off by
+default** (it spends tokens on a schedule) — flip it on in one click when you want it, on the
+low-cost model. Grab the installer from the
+[Releases page](https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases/latest).
+*(A terminal/CLI surface still exists for builders — see the note at the bottom.)*
 
 **2026-07-15 — Smart Todos gained a backstory layer**
 The built-in todo skill now supports an optional second layer per task: a linked paper-trail
@@ -90,59 +91,39 @@ the guardrails? Keep reading below.</i></p>
 
 ---
 
-## 🚦 Choose your path
+## ⬇️ Download & install
 
-### 🌱 New here (never touched a terminal — that's totally fine)
-You'll be talking to your AI company in about 15 minutes. No coding required.
+**No terminal, no commands — download the app, run it, and you're talking to your AI company in
+about 15 minutes.**
 
 ### 🌟 About to install? Scroll up and hit **Star** first — one click, and it helps other people stumble onto this the way you just did.
 
-1. Press **Start**.
-2. Type **PowerShell**.
-3. Hit **Enter**. The window that opens is your terminal (your **CLI**).
-4. Paste this in there and hit **Enter**:
-   ```powershell
-   irm https://raw.githubusercontent.com/Zeekeey-jpeg/LeRoy-HQ/main/install.ps1 | iex
-   ```
-5. Follow the prompts.
-6. **BAM — that's it.**
+<p align="center">
+  <a href="https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases/latest">
+    <img src="https://img.shields.io/badge/⬇%20Download%20LeRoy%20UI-Windows%20installer-2d6cdf?style=for-the-badge&logo=windows&logoColor=white" alt="Download LeRoy UI" />
+  </a>
+</p>
 
-The installer handles everything, puts a **Leroy CLI** shortcut on your Desktop, and launches
-your first session. Onboarding starts on its own — LeRoy asks a few questions about you and
-your work, and builds your memory as you answer.
+1. **[Download the latest `LeRoy UI-Setup` installer](https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases/latest)** from the Releases page.
+2. **Run it and launch LeRoy UI** — it drops a shortcut on your Desktop and Start Menu.
+3. **Follow the first-launch walkthrough.** LeRoy checks your setup, asks a few questions about
+   you and your work, and builds your memory as you answer. From then on you just open the app.
 
-**From here on, you don't run any commands — you use your shortcut.** Double-click
-**Leroy CLI** whenever you want to talk to LeRoy again.
+The app **auto-updates itself** from Releases, so you always have the latest LeRoy.
 
-Stuck at any point? Type **`leroy doctor`** — it checks everything and tells you, in plain
-English, exactly how to fix whatever's missing. **`leroy reset`** undoes the whole install.
+### ✅ Requirements
 
-### 🔁 Already using Claude Code / comfortable in a terminal
-Adopt LeRoy without losing your existing setup:
-```powershell
-git clone https://github.com/Zeekeey-jpeg/LeRoy-HQ "$HOME\LeRoy-HQ"
-cd "$HOME\LeRoy-HQ"
-.\setup.ps1
-```
-If you already have Claude Code content in `~/.claude`, setup backs it up automatically and
-merges LeRoy in additively — nothing of yours gets overwritten.
+- A **Claude subscription** (heavy/autonomous use → **Max tier**). **Recommended model: Claude
+  Sonnet** — the best balance of speed, cost, and capability; the boardroom can still pin
+  high-stakes calls to a top-tier model when it matters.
+- **[Claude Code](https://claude.com/claude-code) installed and signed in** — LeRoy runs on top
+  of it. **LeRoy UI checks for this on first launch and points you to the installer if it's
+  missing**, so you don't have to hunt for anything.
+- **Windows only today**; macOS/Linux are on the roadmap, not shipped.
 
-```bash
-leroy add boardroom     # optional modules, add anytime
-```
-
-**Requires:** a Claude subscription (heavy/autonomous use → Max tier). Node 18+, Python 3.11+,
-and git — `leroy doctor` verifies all of this for you. **Windows-only today**; macOS/Linux
-are on the roadmap, not shipped.
-
-**Recommended model:** **Claude Sonnet** — the best balance of speed, cost, and capability
-for day-to-day LeRoy use. Switch anytime in Claude Code (`/model`); the boardroom can still
-pin high-stakes calls to a top-tier model when it matters.
-
-**No login, no account needed — LeRoy runs entirely on your machine.** There's no cloud
-service and nothing to sign into: it's local-to-local by design, and you talk to it through
-the CLI. If you ever expose anything beyond your own machine (e.g. Tailscale Funnel), read
-the warning in `AUTH-SETUP.md` first — it is not designed for open internet exposure.
+**No login, no account, no cloud — LeRoy runs entirely on your machine.** There's nothing to
+sign into and it doesn't phone home; it's local-to-local by design. (It binds `127.0.0.1` only
+and has no auth layer — treat it like a local dev tool, not something to expose to a network.)
 
 ---
 
@@ -200,12 +181,9 @@ non-token-burning* features are **on by default**, and the *token-burning / self
 features are **off** until you turn each one on. Nothing runs on a timer, watches your inbox,
 or spends tokens in the background unless you explicitly enable it.
 
-The autonomous features are enabled **à la carte** — during onboarding, or later, one at a
-time:
-
-```bash
-leroy enable <feature>     # e.g. leroy enable boardroom
-```
+The autonomous features are enabled **à la carte** — during first-launch onboarding, or later,
+one toggle at a time from the app. Each one shows you what it does (and what it costs) before it
+turns on.
 
 | On by default (safe, no background spend) | Opt-in (autonomous / uses tokens) |
 |---|---|
@@ -307,7 +285,7 @@ Speaks [Model Context Protocol](https://modelcontextprotocol.io). LeRoy doesn't 
 of pre-baked third-party connectors — it ships the thing that **makes** them: a built-in
 **MCP-builder agent + skill** (see [mcps/](mcps/)). Tell it what you want to talk to and it
 scaffolds the server, wires the tools, and drops a local `.env` for your key.
-> **`leroy mcp add` → "talk to my Notion" → it builds the connector for you.**
+> **Just ask — "talk to my Notion" → it builds the connector for you.**
 > If it has an API, LeRoy can reach it — nothing to hunt for on a marketplace.
 
 ## 🧠 Memory — self-growing, Obsidian-native, never "saved"
@@ -331,7 +309,7 @@ capture → distill → chunk → embed → graph
 ## 🏛️ The Boardroom *(optional — off by default)*
 Consequential decisions convene a council — General (act now), Sage (5-yr), Skeptic (what
 breaks), Diplomat (people), Architect (structure) — plus an Inquisitor. It votes and logs the
-verdict. It's **opt-in** (`leroy add boardroom`) because a 24/7 boardroom uses tokens; a
+verdict. It's **opt-in** (one toggle in the app) because a 24/7 boardroom uses tokens; a
 governor caps spend either way to protect a flat plan.
 
 ## 🔧 It runs — and repairs — itself
@@ -349,20 +327,64 @@ turns instead of drifting — and every gate emission is written to the **gate l
 
 ---
 
-## 🚧 The desktop app — unlocks at 5,000 stars
-A visual companion is built — a 3D globe of your sessions, a kanban triage board, the live
-boardroom, an inbox, and drag-and-drop document RAG. It's **not part of this release**: LeRoy
-v1 is **CLI-first and fully complete on the command line**, and the desktop app unlocks once
-the project hits **5,000 GitHub stars** — a real signal that enough people are relying on the
-CLI product to be worth supporting a second surface well, rather than shipping it half-baked
-alongside the launch. Star the repo to help get there and get pinged the moment it unlocks.
+## 🖥️ LeRoy UI
+
+The desktop app is how you use LeRoy — everything below runs on your machine, no terminal in
+sight. **[Download it from Releases.](https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases/latest)**
+
+<p align="center">
+  <img src="docs/screenshots/desktop-three-pane.png" alt="LeRoy UI — three-pane desktop layout" width="780" />
+  <br/><i>the desktop layout: 3D session globe · chat · live feeds rail</i>
+</p>
+
+**Multi-session, for real.** Up to **3 concurrent sessions**, each in a stable slot with its own
+tab in the session strip — and each keeps its own model choice. Close a conversation, keep the
+slot.
+
+<p align="center">
+  <img src="docs/screenshots/session-tabs.png" alt="Session tab strip with per-session model picker" width="780" />
+  <br/><i>three sessions side by side, each with its own model</i>
+</p>
+
+**The tabs.** The right rail switches between **Feeds · Board Room · Kanban · Activity ·
+Memory · Documents** — triage decisions, watch the org work, browse your brain, drop in
+documents for RAG.
+
+**🏛️ The Board Room ships OFF by default.** Autonomous debates are the single most token-hungry
+thing LeRoy does, so the app makes you opt in: one click, after a popup that explains what it
+does and warns that scheduled scenes run on *your* Claude quota — even while you're away. It runs
+on **Haiku by default** (fast, cheap); a dropdown lets you knowingly step up to Sonnet or Opus.
+Daily and rolling token ceilings cap the spend either way.
+
+<p align="center">
+  <img src="docs/screenshots/boardroom-enable.png" alt="Board Room enable popup with token-burn warning and model choice" width="780" />
+  <br/><i>opt-in by design: the enable popup, token warning and all</i>
+</p>
+
+**Honest scope notes:**
+- The isometric **Warehouse view is not in this release** — it stays a private-build toy for now.
+- LeRoy UI runs **entirely on your machine**: it binds `127.0.0.1` only and has **no
+  authentication layer** — treat it like a local dev tool, not something to expose to a network.
 
 ---
 
 ## 🔒 Your data is yours
 Memory lives **on your machine** as plain files. API keys stay in local `.env` files that
-never enter the repo. LeRoy doesn't phone home. `leroy update` pulls *our* code without
-touching *your* grown memory — code and brain are separate layers.
+never enter the repo. LeRoy doesn't phone home. The app **auto-updates itself** from Releases —
+pulling *our* code without ever touching *your* grown memory. Code and brain are separate layers.
+
+---
+
+## 🛠️ Advanced / builders — the CLI is still there
+Prefer the terminal, or want to fold LeRoy into an existing `~/.claude`? A full command-line
+surface still ships in this repo. Clone it and run setup — it backs up any existing Claude Code
+config and merges LeRoy in additively, nothing overwritten:
+```powershell
+git clone https://github.com/Zeekeey-jpeg/LeRoy-HQ "$HOME\LeRoy-HQ"
+cd "$HOME\LeRoy-HQ"
+.\setup.ps1
+```
+The desktop app is the supported path for everyone else — this is just the door for builders.
 
 ---
 
