@@ -5,9 +5,9 @@ LeRoy — maintenance.py  (the ONE generalized self-maintenance engine)
 Ported + generalized from the private harness's scripts/nightly-maintenance.ps1
 (item 39 / G7 / G12). That script was trimmed to housekeeping-only on 2026-07-01
 and hardcoded five values to one machine:
-    C:\\Users\\bscot\\.claude
-    C:\\Users\\bscot\\.claude\\memory\\Projects\\leroy-pwa-app
-    C:\\Users\\bscot\\Backups\\leroy
+    %USERPROFILE%\\.claude
+    %USERPROFILE%\\.claude\\memory\\Projects\\leroy-pwa-app
+    %USERPROFILE%\\Backups\\leroy
     RAG port 7742
     scripts\\build-skill-index.py
 

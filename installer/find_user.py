@@ -3,7 +3,7 @@
 LeRoy — find_user.py
 =====================
 WS4.1 shared user-finding protocol: locates a user's LeRoy install pieces
-generically, with zero hardcoded paths (no `C:\\Users\\bscot`, no personal
+generically, with zero hardcoded paths (no `C:\\Users\\<you>`, no personal
 machine assumptions). Every installer/maintenance script that needs "where is
 this user's stuff" should import this module instead of re-deriving paths.
 
