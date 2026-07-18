@@ -99,12 +99,14 @@ about 15 minutes.**
 ### 🌟 About to install? Scroll up and hit **Star** first — one click, and it helps other people stumble onto this the way you just did.
 
 <p align="center">
-  <a href="https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases/latest">
-    <img src="https://img.shields.io/badge/⬇%20Download%20LeRoy%20UI-Windows%20installer-2d6cdf?style=for-the-badge&logo=windows&logoColor=white" alt="Download LeRoy UI" />
+  <a href="https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases/latest/download/LeRoy-UI-Setup.exe">
+    <img src="https://img.shields.io/badge/⬇%20Download%20LeRoy%20UI-Windows%20installer%20(.exe)-2d6cdf?style=for-the-badge&logo=windows&logoColor=white" alt="Download LeRoy UI installer" />
   </a>
+  <br/>
+  <sub><a href="https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases/latest">release notes &amp; all versions →</a></sub>
 </p>
 
-1. **[Download the latest `LeRoy UI-Setup` installer](https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases/latest)** from the Releases page.
+1. **[⬇ Download the LeRoy UI installer](https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases/latest/download/LeRoy-UI-Setup.exe)** — the button above grabs the `.exe` straight to your Downloads folder (or browse [all releases](https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases/latest)).
 2. **Run it and launch LeRoy UI** — it drops a shortcut on your Desktop and Start Menu.
 3. **Follow the first-launch walkthrough.** LeRoy checks your setup, asks a few questions about
    you and your work, and builds your memory as you answer. From then on you just open the app.

@@ -565,12 +565,12 @@ def phase7_shortcut(dest: Path) -> None:
     Desktop shortcut status check — NOT creation.
 
     installer\\shortcuts.ps1 (called from setup.ps1 step 5, BEFORE this
-    interview ever starts) is the single, authoritative owner of Desktop
-    shortcut creation. This build is CLI-first and ships no desktop app, so it
-    creates exactly ONE shortcut: "Leroy CLI" (a terminal that opens in
-    ~/.claude and starts Claude Code there). This phase only reports whether
-    that shortcut is present — it never creates anything (a second creation
-    path for the same Desktop is a correctness bug waiting to happen).
+    interview ever starts) is the single, authoritative owner of the "Leroy CLI"
+    Desktop shortcut (a terminal that opens in ~/.claude and starts Claude Code
+    there). The LeRoy UI desktop app installs its own "LeRoy UI" shortcut
+    separately. This phase only reports whether the CLI shortcut is present — it
+    never creates anything (a second creation path for the same Desktop is a
+    correctness bug waiting to happen).
     """
     print("\n" + "=" * 60)
     print("  Phase 7 — Desktop shortcuts")

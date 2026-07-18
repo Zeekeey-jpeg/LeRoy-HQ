@@ -30,7 +30,11 @@
 param(
     [switch]$SkipInit,
     [switch]$SkipDeps,
-    [switch]$SkipShortcuts
+    [switch]$SkipShortcuts,
+    # How to treat an existing ~\.claude: "enhance" (additive, nothing overwritten),
+    # "fresh" (move the old one aside to a backup, install clean), or "ask" (prompt).
+    [ValidateSet("enhance", "fresh", "ask")]
+    [string]$Mode = "ask"
 )
 
 $ErrorActionPreference = "Stop"
@@ -52,7 +56,7 @@ function Get-Python {
 }
 
 Write-Host ""
-Write-Host "  Installing LeRoy - your AI company, in your terminal." -ForegroundColor Green
+Write-Host "  Installing LeRoy - your self-growing AI company." -ForegroundColor Green
 Write-Host "  Repo: $RepoRoot"
 
 # --- Step 1: preflight ------------------------------------------------------
@@ -69,15 +73,30 @@ if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
 
-# --- Step 2: backup + additive merge ---------------------------------------
-Section "2/8  Merge LeRoy into ~\.claude (backup first)"
+# --- Step 2: add LeRoy to ~\.claude (enhance existing, or start fresh) -------
+Section "2/8  Add LeRoy to ~\.claude (backup first)"
+$freshFlag = @()
 if (Test-Path $ClaudeHome) {
-    Say "Existing ~\.claude detected - it will be backed up before any change."
+    $choice = $Mode
+    if ($choice -eq "ask") {
+        Say "You already have a ~\.claude (an existing Claude Code setup). How should I add LeRoy?"
+        Say "  [1] Enhance it  - add LeRoy's agents, memory + skills on top. Your settings win; nothing is overwritten."
+        Say "  [2] Start fresh - set your current ~\.claude aside as a backup and install a clean LeRoy."
+        $ans = Read-Host "  Choose 1 or 2 (default 1)"
+        if ($ans -eq "2") { $choice = "fresh" } else { $choice = "enhance" }
+    }
+    if ($choice -eq "fresh") {
+        Say "Start fresh: your current ~\.claude will be moved to a timestamped backup, then a clean LeRoy is installed."
+        $freshFlag = @("--fresh")
+    } else {
+        Say "Enhance: your ~\.claude will be backed up, then LeRoy is added additively (your own files/settings win)."
+    }
 } else {
-    Say "No existing ~\.claude - fresh install."
+    Say "No existing ~\.claude - setting you up fresh."
 }
-& $py (Join-Path $Installer "merge.py")
-if ($LASTEXITCODE -ne 0) { Say "Merge failed. Nothing was overwritten (backup is intact)."; exit $LASTEXITCODE }
+& $py (Join-Path $Installer "merge.py") @freshFlag
+if ($LASTEXITCODE -ne 0) { Say "Install failed. Nothing was overwritten (your backup is intact)."; exit $LASTEXITCODE }
+Say "Done. Your original config (if any) is backed up - undo anytime with 'leroy reset'."
 
 # Record where this checkout lives so future lookups (e.g. a scheduled
 # maintenance task, or `leroy backup` run from a different cwd) can find the

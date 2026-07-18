@@ -312,10 +312,30 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dry-run", action="store_true", help="show the plan, write nothing")
     parser.add_argument("--source", type=Path, default=None, help="override the core/ source dir")
     parser.add_argument("--dest", type=Path, default=None, help="override the ~/.claude target dir")
+    parser.add_argument(
+        "--fresh",
+        action="store_true",
+        help="start clean: move any existing dest aside to a timestamped backup, then "
+        "install the overlay into an empty dir (instead of merging into what's there). "
+        "The original is preserved intact as the backup — never merged into or overwritten.",
+    )
     args = parser.parse_args(argv)
 
     source = (args.source or default_source()).resolve()
     dest = (args.dest or default_dest()).resolve()
+
+    # --fresh: preserve the user's whole existing config AS the backup by MOVING
+    # it aside, so the install below lands in a clean dir. Nothing of theirs is
+    # merged into or overwritten — their original sits intact next to the new one
+    # and `leroy reset` restores it.
+    fresh_backup = None
+    if args.fresh and dest.exists():
+        stamp = _dt.datetime.now().strftime("%Y-%m-%d-%H%M%S")
+        fresh_backup = dest.parent / f"{dest.name}.backup-{stamp}"
+        if args.dry_run:
+            print(f"\n  [fresh] would move existing {dest} aside to {fresh_backup}, then install clean\n")
+        else:
+            dest.rename(fresh_backup)  # move, not copy — original preserved as the backup
 
     try:
         plan = build_plan(source, dest)
@@ -327,7 +347,9 @@ def main(argv: list[str] | None = None) -> int:
     # under - most robust (no dependency on `python3` being on PATH).
     interpreter = sys.executable or None
 
-    backup_dir = backup(dest, dry_run=args.dry_run)
+    # In --fresh mode the move-aside above already produced the backup; otherwise
+    # take the usual copy-based backup of the existing config before merging.
+    backup_dir = fresh_backup if args.fresh else backup(dest, dry_run=args.dry_run)
     if not args.dry_run:
         apply_plan(source, dest, plan, interpreter)
     print_plan(plan, source, dest, args.dry_run, backup_dir)

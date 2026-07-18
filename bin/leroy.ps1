@@ -159,9 +159,11 @@ function Cmd-Memory {
 }
 
 function Cmd-Start {
-    # Desktop app ships in v1.1; be clear rather than half-launch.
-    Say "The LeRoy desktop app is coming in a future release (v1.1) - it's not part of this build."
-    Say "LeRoy v1 is CLI-first and fully complete. Run 'leroy' to start a session."
+    # LeRoy UI (desktop app) installs separately from this CLI - point, don't half-launch.
+    Say "LeRoy UI (the desktop app) installs separately from this CLI."
+    Say "Download it: https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases/latest"
+    Say "Already installed? Launch 'LeRoy UI' from your Desktop or Start Menu."
+    Say "Or just keep going here - run 'leroy' to start a terminal session."
     exit 0
 }
 

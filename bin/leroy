@@ -134,8 +134,10 @@ cmd_memory() {
 }
 
 cmd_start() {
-    say "The LeRoy desktop app is coming in a future release (v1.1) — it's not part of this build."
-    say "LeRoy v1 is CLI-first and fully complete. Run 'leroy' to start a session."
+    say "LeRoy UI (the desktop app) installs separately from this CLI."
+    say "Download it: https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases/latest"
+    say "Already installed? Launch 'LeRoy UI' from your Desktop or Start Menu."
+    say "Or just keep going here — run 'leroy' to start a terminal session."
 }
 
 cmd_update() {

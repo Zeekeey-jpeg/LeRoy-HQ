@@ -10,10 +10,10 @@
                       so Claude Code loads the LeRoy config/agents/skills for
                       this account automatically.
 
-    There is deliberately no second "Leroy" (UI) shortcut: this build is
-    CLI-first and ships no desktop app, so a UI shortcut would only point at a
-    "coming soon" notice. If an old "Leroy.lnk" from a previous install is on
-    the Desktop, we remove it so the user is left with exactly one shortcut.
+    This creates the "Leroy CLI" terminal shortcut only. The LeRoy UI desktop
+    app installs its own "LeRoy UI" shortcut from its own installer, so this
+    script leaves any UI shortcut alone - the terminal and the desktop app
+    coexist and share the same ~\.claude brain.
 
     Desktop resolution uses the Windows known-folder API
     ([Environment]::GetFolderPath('DesktopDirectory')), NOT $HOME\Desktop. On
@@ -83,23 +83,12 @@ if (-not (Test-Path $DesktopDir)) {
 }
 
 $cliShortcut = Join-Path $DesktopDir "Leroy CLI.lnk"
-$staleUi     = Join-Path $DesktopDir "Leroy.lnk"
 
 if ($DryRun) {
     Say "[dry-run] Desktop resolved to: $DesktopDir"
     Say "[dry-run] would create: $cliShortcut  (terminal at $ClaudeHome -> starts Claude Code)"
-    if (Test-Path $staleUi) { Say "[dry-run] would remove stale UI shortcut: $staleUi" }
+    Say "[dry-run] any existing 'LeRoy UI' desktop-app shortcut is left untouched."
     exit 0
-}
-
-# --- remove a stale "Leroy" (UI) shortcut from a previous install ------------
-if (Test-Path $staleUi) {
-    try {
-        Remove-Item -Path $staleUi -Force
-        Say "Removed old 'Leroy' shortcut (this build has no desktop app - CLI only)."
-    } catch {
-        Say "Note: could not remove old 'Leroy' shortcut at $staleUi (in use?) - safe to delete by hand."
-    }
 }
 
 # --- "Leroy CLI" - terminal at ~/.claude, starts Claude Code -----------------
