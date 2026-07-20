@@ -22,7 +22,7 @@
 </p>
 
 <p align="center">
-  <a href="#-download--install">Download</a> ·
+  <a href="https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases/latest/download/LeRoy-UI-Setup.exe">Download</a> ·
   <a href="#-leroy-ui">The app</a> ·
   <a href="#-the-org-chart--27-agents-5-tiers">Architecture</a> ·
   <a href="docs/">Docs</a> ·
