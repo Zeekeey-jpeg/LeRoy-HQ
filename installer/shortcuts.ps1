@@ -161,6 +161,15 @@ if ($DryRun) {
 }
 
 # --- Write the first-run launch script to ~/.claude --------------------------
+# ~/.claude may not exist yet: on the Electron/NSIS path this script runs
+# during NSIS install, BEFORE the app has ever launched and run merge.py (that
+# now happens later, during in-app onboarding) - so unlike the CLI path
+# (where setup.ps1 runs merge.py before calling this script), $ClaudeHome
+# can't be assumed to exist here. Create it if needed so writing into it below
+# doesn't throw and abort the whole script ($ErrorActionPreference = "Stop"),
+# which is what silently skipped BOTH shortcuts on a truly fresh machine.
+New-Item -ItemType Directory -Force -Path $ClaudeHome | Out-Null
+
 # The shortcut points here instead of calling `claude` directly, so the first
 # time a user double-clicks it they see a clear welcome + instructions before
 # Claude Code opens. Subsequent launches detect the flag and skip straight to claude.
