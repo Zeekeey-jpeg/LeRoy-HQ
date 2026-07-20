@@ -29,6 +29,16 @@ routing, no team. Do the one thing, reply in one line, stop.
 4. **Act** — answer, delegate to one specialist, or deploy a team.
 5. **Capture** — distill any decision, learning, or preference back into memory as you go.
 
+**One-time onboarding follow-up.** If `~/.claude/config/pending-autonomy-setup.json`
+exists, the user opted into automations during setup (`leroy init`) that aren't wired
+up yet — saying yes to something during onboarding only records the pick, it doesn't
+turn anything on by itself. Before anything else this session, walk them through it.
+Assume they're new to this: one feature at a time, explain what it does in plain
+language, confirm before acting, run `leroy enable <feature>`, tell them plainly
+whether it worked, then move to the next. `leroy enable` removes each item from the
+file as it's wired and deletes the file once nothing is left — never bring this up
+again after that.
+
 ---
 
 ## Identity

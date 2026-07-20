@@ -575,7 +575,41 @@ def write_autonomy_config(dest: Path, defaults: dict, picks: dict) -> Path:
     }
     cfg_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     print(f"    {WROTE} {cfg_path}")
+
+    write_pending_setup(dest, features)
     return cfg_path
+
+
+def write_pending_setup(dest: Path, features: dict) -> None:
+    """
+    If the user enabled anything that isn't wired yet, drop a small marker file
+    listing exactly what's pending. core/CLAUDE.md's Position Zero checks for
+    this file at the start of every session and walks the user through wiring
+    each item one at a time via `leroy enable <feature>` — this is what makes
+    saying "yes" during onboarding actually lead somewhere, instead of silently
+    recording a pick nobody ever acts on. `leroy enable`/`autonomy.py` deletes
+    this file once every pending item is resolved, so the guidance in CLAUDE.md
+    never resurfaces after the user is done — no CLAUDE.md edits needed per
+    user, just this ephemeral file coming and going.
+    """
+    pending = [
+        {"key": key, "label": spec.get("label", key)}
+        for key, spec in features.items()
+        if spec.get("enabled") and not spec.get("wired")
+    ]
+    pending_path = dest / "config" / "pending-autonomy-setup.json"
+    if not pending:
+        # Nothing pending (common case: user opted into nothing, or everything
+        # they picked is already wired) - make sure a stale marker from a
+        # previous run doesn't linger and trigger guidance for nothing.
+        pending_path.unlink(missing_ok=True)
+        return
+    pending_path.parent.mkdir(parents=True, exist_ok=True)
+    pending_path.write_text(
+        json.dumps({"created": today(), "pending": pending}, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    print(f"    {WROTE} {pending_path}")
 
 
 def phase6_subscription(autonomy: dict) -> None:
