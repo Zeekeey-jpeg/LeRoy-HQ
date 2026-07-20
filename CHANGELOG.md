@@ -1,10 +1,37 @@
 # LeRoy UI — Changelog
 
+## v0.1.7 — 2026-07-20
+
+### New — connect your Claude subscription from the app
+
+**Reported:** on a fresh install, there was no way to sign in to Claude. The in-app
+session can't run the `/login` flow ("not available in this session"), so a new user
+had no path to connect their Claude subscription and nothing worked.
+
+**Added:**
+
+- **Claude connection indicator** in the left nav rail, just above the Settings cog.
+  It **blinks** whenever the app isn't connected to Claude, and sits quiet once you're
+  signed in.
+- **One-click connect.** Clicking the blinking icon opens Claude Code's own sign-in
+  flow in a normal console + browser, so you authenticate with your regular Claude
+  subscription account. Your credentials are stored locally on your own machine by
+  Claude Code — LeRoy never sees or stores them.
+- The indicator clears itself automatically a moment after you finish signing in — no
+  restart needed.
+
+**Also:**
+
+- Build pipeline now runs a **secret scan on the packed app** before the installer is
+  produced, so a release can never ship a credential baked into the bundle.
+
+---
+
 ## v0.1.1 — 2026-07-20
 
 ### Fixes — installer first-run experience
 
-**Reported via:** internal test on a fresh Windows machine (bscott@twgsecurity.com, 2026-07-20):
+**Reported via:** internal test on a fresh Windows machine (2026-07-20):
 the installer appeared to do nothing (spinner, then silence), no icon in Start, no
 Desktop shortcuts, and the Start Menu entry dropped straight into a raw PowerShell
 console with manual CLI instructions.
