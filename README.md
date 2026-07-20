@@ -35,6 +35,9 @@
 
 *A living log so you can see the system is actively growing, not a one-time drop.*
 
+**2026-07-20 — Installer now shows a popup + first-run welcome guide**
+After running setup, a Windows dialog confirms the install succeeded and points you to the Desktop shortcut. The "Leroy CLI" shortcut now launches a first-run welcome screen with step-by-step instructions before opening Claude Code — no more silent install on a fresh machine.
+
 **2026-07-17 — LeRoy is now a desktop app: download, open, done**
 LeRoy ships as a **Windows desktop app** — one download, no terminal required. You get session
 tabs, the live org-chart globe, an inbox, the Kanban triage board, and the Board Room where your

@@ -197,6 +197,19 @@ Write-Host "  |  From here on, use your 'Leroy CLI' Desktop shortcut.        |" 
 Write-Host "  +--------------------------------------------------------------+" -ForegroundColor Green
 Write-Host ""
 
+# --- Post-install popup (gives users a clear signal something happened) ------
+try {
+    $shell = New-Object -ComObject WScript.Shell
+    $shell.Popup(
+        "LeRoy is installed and ready.`n`nLook for the 'Leroy CLI' shortcut on your Desktop.`nDouble-click it to start your first session.",
+        0,
+        "LeRoy Installed",
+        64
+    ) | Out-Null
+} catch {
+    # Non-fatal: the card above already showed the same info
+}
+
 # --- Star nudge --------------------------------------------------------------
 Write-Host "  If LeRoy earns its keep, a star helps other people find it:" -ForegroundColor Yellow
 Write-Host "    https://github.com/Zeekeey-jpeg/LeRoy-HQ" -ForegroundColor Yellow

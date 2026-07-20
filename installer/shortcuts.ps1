@@ -82,28 +82,67 @@ if (-not (Test-Path $DesktopDir)) {
     exit 0
 }
 
-$cliShortcut = Join-Path $DesktopDir "Leroy CLI.lnk"
+$cliShortcut  = Join-Path $DesktopDir "Leroy CLI.lnk"
+$LaunchScript = Join-Path $ClaudeHome "leroy-start.ps1"
 
 if ($DryRun) {
     Say "[dry-run] Desktop resolved to: $DesktopDir"
-    Say "[dry-run] would create: $cliShortcut  (terminal at $ClaudeHome -> starts Claude Code)"
+    Say "[dry-run] would write: $LaunchScript  (first-run welcome + claude launcher)"
+    Say "[dry-run] would create: $cliShortcut -> $LaunchScript"
     Say "[dry-run] any existing 'LeRoy UI' desktop-app shortcut is left untouched."
     exit 0
 }
 
-# --- "Leroy CLI" - terminal at ~/.claude, starts Claude Code -----------------
-# WorkingDirectory sets the folder Claude Code opens in, so it loads the LeRoy
-# config for this account. -NoExit keeps the window open (and shows any error
-# if `claude` isn't on PATH yet) instead of flashing closed.
+# --- Write the first-run launch script to ~/.claude --------------------------
+# The shortcut points here instead of calling `claude` directly, so the first
+# time a user double-clicks it they see a clear welcome + instructions before
+# Claude Code opens. Subsequent launches detect the flag and skip straight to claude.
+$LaunchScriptContent = @'
+# leroy-start.ps1 -- first-run welcome + claude launcher
+# Lives in ~/.claude/; the Desktop shortcut points here.
+$ClaudeHome = Split-Path -Parent $MyInvocation.MyCommand.Path
+$FlagFile   = Join-Path $ClaudeHome ".leroy-started"
+
+if (-not (Test-Path $FlagFile)) {
+    Clear-Host
+    Write-Host ""
+    Write-Host "  Welcome to LeRoy!" -ForegroundColor Cyan
+    Write-Host "  ==============================================" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  You are about to start your first LeRoy session." -ForegroundColor White
+    Write-Host ""
+    Write-Host "  Getting started:" -ForegroundColor Yellow
+    Write-Host "    - Just type anything -- LeRoy will introduce itself." -ForegroundColor Green
+    Write-Host "    - Say  leroy init    to run the full onboarding interview." -ForegroundColor Green
+    Write-Host "    - Say  leroy doctor  to verify everything is set up correctly." -ForegroundColor Green
+    Write-Host "    - Say  leroy memory  to browse your memory vault." -ForegroundColor Green
+    Write-Host ""
+    Write-Host "  Your memory vault: $ClaudeHome\memory\" -ForegroundColor Gray
+    Write-Host "  To undo the install at any time: leroy reset" -ForegroundColor Gray
+    Write-Host ""
+    New-Item -ItemType File -Path $FlagFile -Force | Out-Null
+    Read-Host "  Press Enter to start your first session"
+    Write-Host ""
+}
+
+Set-Location $ClaudeHome
+claude
+'@
+Set-Content -Path $LaunchScript -Value $LaunchScriptContent -Encoding UTF8
+Say "Wrote first-run launcher: $LaunchScript"
+
+# --- "Leroy CLI" shortcut -> leroy-start.ps1 ---------------------------------
+# Points to leroy-start.ps1 so first launch shows a welcome guide + instructions,
+# then starts Claude Code. -NoExit keeps the window alive so errors are visible.
 $psExe = Join-Path $env:SystemRoot "System32\WindowsPowerShell\v1.0\powershell.exe"
 $W = New-Object -ComObject WScript.Shell
 $cli = $W.CreateShortcut($cliShortcut)
 $cli.TargetPath       = $psExe
-$cli.Arguments        = "-NoExit -NoLogo -Command claude"
+$cli.Arguments        = "-NoExit -NoLogo -ExecutionPolicy Bypass -File `"$LaunchScript`""
 $cli.WorkingDirectory = $ClaudeHome
 $cli.IconLocation     = "$psExe,0"
-$cli.Description      = "Open a terminal in ~/.claude and start Claude Code (LeRoy)"
+$cli.Description      = "Start LeRoy -- shows a welcome guide on first launch, then Claude Code"
 $cli.Save()
 
 Say "Created 'Leroy CLI' shortcut on your Desktop: $cliShortcut"
-Say "It opens a terminal in $ClaudeHome and starts Claude Code there."
+Say "First launch shows a welcome guide; subsequent launches go straight to Claude Code."
