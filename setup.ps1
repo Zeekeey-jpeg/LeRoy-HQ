@@ -12,7 +12,10 @@
          (never clobbers your settings; hooks are appended).
       3. Install Python deps (from requirements.txt if present).
       4. Register the `leroy` command on PATH (per-user).
-      5. Create both Desktop shortcuts - "Leroy" (UI) + "Leroy CLI" (terminal).
+      5. Create the "Leroy CLI" Desktop shortcut, plus "LeRoy UI" too if the
+         desktop app is already installed on this machine (installer\shortcuts.ps1
+         auto-detects it; if not installed yet, the LeRoy UI installer creates
+         its own "LeRoy UI" shortcut later via the same script).
       6. Index memory\ into the RAG sidecar (existing-user upgrades keep their
          vault; this only builds a derived index, never touches the vault).
       7. Launch the interview -> leroy init.
