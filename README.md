@@ -96,25 +96,20 @@ the guardrails? Keep reading below.</i></p>
 
 ## ⬇️ Download & install
 
-**No terminal, no commands — download the app, run it, and you're talking to your AI company in
-about 15 minutes.**
-
-### 🌟 About to install? Scroll up and hit **Star** first — one click, and it helps other people stumble onto this the way you just did.
-
 <p align="center">
   <a href="https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases/latest/download/LeRoy-UI-Setup.exe">
     <img src="https://img.shields.io/badge/⬇%20Download%20LeRoy%20UI-Windows%20installer%20(.exe)-2d6cdf?style=for-the-badge&logo=windows&logoColor=white" alt="Download LeRoy UI installer" />
   </a>
-  <br/>
-  <sub><a href="https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases/latest">release notes &amp; all versions →</a></sub>
 </p>
 
-1. **[⬇ Download the LeRoy UI installer](https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases/latest/download/LeRoy-UI-Setup.exe)** — the button above grabs the `.exe` straight to your Downloads folder (or browse [all releases](https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases/latest)).
-2. **Run it and launch LeRoy UI** — it drops a shortcut on your Desktop and Start Menu.
-3. **Follow the first-launch walkthrough.** LeRoy checks your setup, asks a few questions about
-   you and your work, and builds your memory as you answer. From then on you just open the app.
+<p align="center">
+  <sub>One <code>.exe</code>, no terminal. Run it, then follow the first-launch wizard — it checks
+  your setup, asks a few questions, and builds your memory as you go.
+  <a href="https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases/latest">Release notes ↗</a></sub>
+</p>
 
-The app **auto-updates itself** from Releases, so you always have the latest LeRoy.
+The app **auto-updates itself** from Releases afterward, so you always have the latest LeRoy.
+*(Enjoying it? A ⭐ Star up top helps other people find it.)*
 
 ### ✅ Requirements
 
