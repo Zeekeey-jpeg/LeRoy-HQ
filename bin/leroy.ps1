@@ -19,8 +19,7 @@
         leroy update        Pull upstream code (never touches your grown memory)
         leroy reset         Clean rollback (restores the pre-LeRoy backup)
 
-    init / doctor / merge are fully wired. start / desktop are stubs that print
-    what they will do.
+    init / doctor / merge / start are fully wired.
 
     Paths are always derived from $HOME\.claude - nothing is hardcoded.
 #>
@@ -158,13 +157,37 @@ function Cmd-Memory {
     exit 0
 }
 
+function Find-LeroyUiExe {
+    # Same detection order as installer\shortcuts.ps1's -UiExePath auto-detect,
+    # kept in sync deliberately: the default (perMachine:false) NSIS install
+    # location first, then the HKCU uninstall registry for a custom install dir.
+    $guess = Join-Path $env:LOCALAPPDATA "Programs\LeRoy UI\LeRoy UI.exe"
+    if (Test-Path $guess) { return $guess }
+    $uninstKeys = @(
+        "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\LeRoy UI",
+        "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\{*LeRoy*}"
+    )
+    foreach ($k in $uninstKeys) {
+        $hit = Get-ItemProperty -Path $k -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($hit -and $hit.InstallLocation) {
+            $candidate = Join-Path $hit.InstallLocation "LeRoy UI.exe"
+            if (Test-Path $candidate) { return $candidate }
+        }
+    }
+    return $null
+}
+
 function Cmd-Start {
-    # LeRoy UI (desktop app) installs separately from this CLI - point, don't half-launch.
-    Say "LeRoy UI (the desktop app) installs separately from this CLI."
+    $exe = Find-LeroyUiExe
+    if ($exe) {
+        Say "Launching LeRoy UI: $exe"
+        Start-Process -FilePath $exe
+        exit 0
+    }
+    Say "LeRoy UI (the desktop app) isn't installed on this machine yet."
     Say "Download it: https://github.com/Zeekeey-jpeg/LeRoy-HQ/releases/latest"
-    Say "Already installed? Launch 'LeRoy UI' from your Desktop or Start Menu."
     Say "Or just keep going here - run 'leroy' to start a terminal session."
-    exit 0
+    exit 1
 }
 
 function Cmd-Update {

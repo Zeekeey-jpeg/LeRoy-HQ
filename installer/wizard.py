@@ -27,6 +27,15 @@ at a time. Nothing autonomous is installed or scheduled here — we only RECORD 
 user's picks to ~/.claude/config/autonomy.json; `leroy enable <feature>` wires
 each one later.
 
+--json mode: for the LeRoy UI onboarding screen. Every phase function is
+unchanged — the ONLY thing that changes is how ask()/ask_yes() get their
+answer: instead of a terminal input(), each question is emitted as one JSON
+line on stdout ({"type": "question", ...}) and the answer is read as one JSON
+line on stdin ({"answer": ...}). Every write_file() call still fires the
+moment its phase runs, exactly as in the terminal path, so a UI-driven
+interview persists progress immediately and produces byte-identical output to
+the CLI path — there is no second implementation of the vault file formats.
+
 The vault lives at ~/.claude/memory/ (never hardcoded). If a
 memory.seed/ template tree exists in the repo it is used to pre-create the
 folder skeleton; otherwise we create the folders ourselves.
@@ -62,6 +71,11 @@ except (UnicodeEncodeError, LookupError):
 WROTE = "✍️ " if _UTF_OK else "[wrote]"
 OK = "✅" if _UTF_OK else "[ OK ]"
 
+# Set from --json in main(). The sole I/O boundary this flips is ask()/ask_yes()
+# below — every phase function's logic (including write_file() calls) is
+# identical in both modes.
+JSON_MODE = False
+
 VAULT_FOLDERS = [
     "People", "Projects", "Goals", "Decisions", "Boardroom",
     "Chat", "Feedback", "Patterns", "Reference", "Archive",
@@ -95,11 +109,42 @@ def _desktop_dir() -> Path:
 
 
 # --- prompt helpers ---------------------------------------------------------
+def _emit_question(prompt: str, default, kind: str) -> None:
+    print(json.dumps({"type": "question", "kind": kind, "prompt": prompt, "default": default}), flush=True)
+
+
+def _read_json_answer():
+    """Read one JSON line from stdin: {"answer": ...}. Returns None on EOF or
+    a malformed line, which callers treat the same as Ctrl-C/EOF in the
+    terminal path — fall back to the question's default."""
+    line = sys.stdin.readline()
+    if not line:
+        return None
+    try:
+        payload = json.loads(line)
+    except ValueError:
+        return None
+    return payload.get("answer")
+
+
 def ask(prompt: str, default: str = "") -> str:
     """
     Ask a question. Blank input (or 'skip') returns the default.
     Ctrl-C / EOF is treated as 'skip everything gracefully'.
+    In --json mode the question/answer round-trip is one JSON line each way
+    on stdout/stdin instead of input() — see the --json note in the module
+    docstring.
     """
+    if JSON_MODE:
+        _emit_question(prompt, default, "text")
+        answer = _read_json_answer()
+        if answer is None:
+            return default
+        raw = str(answer).strip()
+        if raw.lower() in {"skip", ""}:
+            return default
+        return raw
+
     hint = "  (press Enter to continue)" if not default else f"  [{default}]"
     try:
         raw = input(f"\n  {prompt}{hint}\n  > ").strip()
@@ -112,6 +157,15 @@ def ask(prompt: str, default: str = "") -> str:
 
 
 def ask_yes(prompt: str, default: bool = False) -> bool:
+    if JSON_MODE:
+        _emit_question(prompt, default, "yesno")
+        answer = _read_json_answer()
+        if answer is None:
+            return default
+        if isinstance(answer, bool):
+            return answer
+        return str(answer).strip().lower() in {"y", "yes", "true"}
+
     d = "Y/n" if default else "y/N"
     try:
         raw = input(f"\n  {prompt}  ({d})\n  > ").strip().lower()
@@ -607,16 +661,25 @@ def close(name: str) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
+    global JSON_MODE
+
     parser = argparse.ArgumentParser(description="LeRoy first-run interview (leroy init)")
     parser.add_argument("--dest", type=Path, default=None, help="override ~/.claude (testing)")
     parser.add_argument("--seed", type=Path, default=None, help="override the memory.seed/ template dir")
+    parser.add_argument(
+        "--json", action="store_true",
+        help="drive the interview over JSON lines on stdin/stdout (used by the LeRoy UI onboarding screen)",
+    )
     args = parser.parse_args(argv)
+
+    JSON_MODE = args.json
 
     dest = (args.dest or (Path.home() / ".claude")).resolve()
     seed = args.seed or (Path(__file__).resolve().parent.parent / "memory.seed")
     defaults = load_autonomy_defaults()
 
-    greeting()
+    if not JSON_MODE:
+        greeting()
 
     vault = ensure_vault(dest, seed)
     print(f"\n  Vault: {vault}")
@@ -628,7 +691,12 @@ def main(argv: list[str] | None = None) -> int:
     autonomy = phase5_autonomy(dest, defaults)
     phase6_subscription(autonomy)
     phase7_shortcut(dest)
-    close(ctx.get("name", "there"))
+
+    name = ctx.get("name", "there")
+    if JSON_MODE:
+        print(json.dumps({"type": "done", "name": name}), flush=True)
+    else:
+        close(name)
     return 0
 
 

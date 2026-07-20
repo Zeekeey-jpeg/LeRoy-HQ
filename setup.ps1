@@ -12,7 +12,10 @@
          (never clobbers your settings; hooks are appended).
       3. Install Python deps (from requirements.txt if present).
       4. Register the `leroy` command on PATH (per-user).
-      5. Create both Desktop shortcuts - "Leroy" (UI) + "Leroy CLI" (terminal).
+      5. Create the "Leroy CLI" Desktop shortcut, plus "LeRoy UI" too if the
+         desktop app is already installed on this machine (installer\shortcuts.ps1
+         auto-detects it; if not installed yet, the LeRoy UI installer creates
+         its own "LeRoy UI" shortcut later via the same script).
       6. Index memory\ into the RAG sidecar (existing-user upgrades keep their
          vault; this only builds a derived index, never touches the vault).
       7. Launch the interview -> leroy init.
@@ -196,6 +199,19 @@ Write-Host "  |  (Open a NEW terminal so 'leroy' is on your PATH.)           |" 
 Write-Host "  |  From here on, use your 'Leroy CLI' Desktop shortcut.        |" -ForegroundColor Green
 Write-Host "  +--------------------------------------------------------------+" -ForegroundColor Green
 Write-Host ""
+
+# --- Post-install popup (gives users a clear signal something happened) ------
+try {
+    $shell = New-Object -ComObject WScript.Shell
+    $shell.Popup(
+        "LeRoy is installed and ready.`n`nLook for the 'Leroy CLI' shortcut on your Desktop.`nDouble-click it to start your first session.",
+        0,
+        "LeRoy Installed",
+        64
+    ) | Out-Null
+} catch {
+    # Non-fatal: the card above already showed the same info
+}
 
 # --- Star nudge --------------------------------------------------------------
 Write-Host "  If LeRoy earns its keep, a star helps other people find it:" -ForegroundColor Yellow
