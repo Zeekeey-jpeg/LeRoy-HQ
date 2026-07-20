@@ -342,7 +342,7 @@ tab in the session strip — and each keeps its own model choice. Close a conver
 slot.
 
 <p align="center">
-  <img src="docs/screenshots/session-tabs.png" alt="Session tab strip with per-session model picker" width="780" />
+  <img src="docs/screenshots/session-tabs.png" alt="Session tab strip with per-session model picker" height="480" />
   <br/><i>three sessions side by side, each with its own model</i>
 </p>
 

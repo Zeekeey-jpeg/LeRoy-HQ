@@ -482,55 +482,26 @@ created: {today()}
 
 def phase5_autonomy(dest: Path, defaults: dict) -> dict:
     """
-    A la carte autonomy menu. Each item DEFAULT OFF. We RECORD the user's picks
-    to ~/.claude/config/autonomy.json — we do NOT install or schedule anything
-    here. Enabled features get wired later via `leroy enable <feature>`.
+    No questions asked here anymore (2026-07-20 — interview was running long,
+    mostly on capability opt-ins better discovered as UI shortcuts than forced
+    yes/no's mid-interview). Every off-by-default feature starts OFF; the user
+    turns any of them on later — from the app's own shortcuts/panels (Boardroom
+    already has its in-panel toggle) or `leroy enable <feature>` — at their own
+    pace, once they've actually seen what's there. This still writes
+    ~/.claude/config/autonomy.json (other code, e.g. brain_interview_done
+    detection, depends on that file existing) — it just no longer interrupts
+    onboarding to ask about it.
     """
-    print("\n" + "=" * 60)
-    print("  Phase 5 — Autonomy menu")
-    print("  (Turn on the extras you want. Everything here is OFF unless you")
-    print("   say yes — and nothing gets scheduled today. You can flip any of")
-    print("   these later with `leroy enable <feature>`.)")
-    print("=" * 60)
-
-    on_default = defaults.get("on_by_default", {})
-    if on_default:
-        print("\n  Already ON for you (free, no timers, no autonomous spend):")
-        for key, spec in on_default.items():
-            if key.startswith("_") or not isinstance(spec, dict):
-                continue
-            print(f"    {OK}  {spec.get('label', '?')} — {spec.get('plain', '')}")
-
     off_items = defaults.get("off_by_default", {})
-    picks: dict[str, bool] = {}
-    enabled_any = False
-    for key, spec in off_items.items():
-        if key.startswith("_") or not isinstance(spec, dict):
-            continue
-        label = spec.get("label", key)
-        plain = spec.get("plain", "")
-        cost = spec.get("token_cost", "")
-        print(f"\n  • {label}")
-        print(f"    {plain}")
-        if cost:
-            print(f"    Token cost: {cost}")
-        want = ask_yes(f"Turn on {label}?", default=False)
-        picks[key] = want
-        if want:
-            enabled_any = True
-
+    picks = {
+        key: False
+        for key, spec in off_items.items()
+        if not key.startswith("_") and isinstance(spec, dict)
+    }
     write_autonomy_config(dest, defaults, picks)
-
-    if enabled_any:
-        chosen = ", ".join(off_items[k].get("label", k) for k, v in picks.items() if v)
-        print(f"\n    {OK} Recorded: {chosen}.")
-        print("    These are saved but NOT scheduled yet — run")
-        print("    `leroy enable <feature>` when you're ready to wire them up.")
-    else:
-        print("\n    (No autonomous features turned on — that's the recommended start.)")
-        print("    Add any later with `leroy enable <feature>`.")
-
-    return {"picks": picks, "enabled_any": enabled_any}
+    print("\n  (Extras like morning briefings and scheduled automations are off by")
+    print("   default — turn any on later from the app whenever you want them.)")
+    return {"picks": picks, "enabled_any": False}
 
 
 def write_autonomy_config(dest: Path, defaults: dict, picks: dict) -> Path:
@@ -720,7 +691,10 @@ def main(argv: list[str] | None = None) -> int:
 
     ctx = phase1_you(vault)
     phase2_work(vault)
-    phase3_tools(vault, dest)
+    # phase3_tools (connect CRM/Gmail/other) is intentionally not called during
+    # the interview anymore (2026-07-20) — connecting a tool is a "when I need
+    # it" action, not a get-to-know-you question. Still available any time via
+    # `leroy mcp add`.
     phase4_feedback(vault)
     autonomy = phase5_autonomy(dest, defaults)
     phase6_subscription(autonomy)
