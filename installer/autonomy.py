@@ -66,6 +66,31 @@ def save_config(dest: Path, cfg: dict) -> None:
     path.write_text(json.dumps(cfg, indent=2) + "\n", encoding="utf-8")
 
 
+def _pending_setup_path(dest: Path) -> Path:
+    return dest / "config" / "pending-autonomy-setup.json"
+
+
+def clear_pending_setup(dest: Path, feature: str) -> None:
+    """Remove `feature` from the guided-onboarding-followup marker (written by
+    wizard.py's phase5_autonomy) once it's actually wired. Deletes the marker
+    entirely once nothing is left pending, so core/CLAUDE.md's Position Zero
+    check stops surfacing follow-up guidance — this is the "clean it up so it
+    doesn't bug them again" half of the guided-setup feature."""
+    path = _pending_setup_path(dest)
+    if not path.exists():
+        return
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return
+    remaining = [p for p in data.get("pending", []) if p.get("key") != feature]
+    if not remaining:
+        path.unlink(missing_ok=True)
+    else:
+        data["pending"] = remaining
+        path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+
 # --- wiring stubs -----------------------------------------------------------
 # Enable/disable does two things: (1) flips the config flag [real, done here],
 # and (2) wires/unwires the actual feature. The wiring for the autonomous
@@ -146,6 +171,7 @@ def cmd_enable(dest: Path, feature: str) -> int:
     wire_feature(feature, dest)
     entry["wired"] = True
     save_config(dest, cfg)
+    clear_pending_setup(dest, feature)
     print(f"  {ON} '{feature}' is on.")
     return 0
 

@@ -37,15 +37,7 @@
   },
 
   "off_by_default": {
-    "_comment": "Autonomous / token-burning features. Offered a la carte during onboarding, each DEFAULT NO. Recorded but NOT installed or scheduled until `leroy enable <feature>`.",
-    "boardroom": {
-      "label": "Boardroom",
-      "plain": "A simulated C-suite that debates your decisions and watches the system for improvements.",
-      "token_cost": "token-heavy; recommended only on Claude Max",
-      "autonomous": true,
-      "recommends_max": true,
-      "wires": "registers the boardroom scene cron + enables the boardroom module"
-    },
+    "_comment": "Autonomous / token-burning features. Offered a la carte during onboarding, each DEFAULT NO. Recorded but NOT installed or scheduled until `leroy enable <feature>`. Boardroom is deliberately NOT listed here — the desktop app already ships every agent/module it needs and has its own dedicated in-panel enable flow (governor.json + POST /flow/boardroom/config, see handlers/boardroom.py), which is a better place to make that specific decision than a yes/no question during onboarding before the user has even seen the panel. `leroy add boardroom` + `leroy enable boardroom` still exist for the terminal-only path.",
     "morning_briefing": {
       "label": "Morning briefing",
       "plain": "A short daily digest each morning; can fold in boardroom findings.",
