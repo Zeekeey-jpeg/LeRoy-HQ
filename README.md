@@ -35,6 +35,9 @@
 
 *A living log so you can see the system is actively growing, not a one-time drop.*
 
+**2026-07-23 — v0.1.10: a smoother first run**
+Fixes from real first-launch use. Onboarding now waits for you to finish and click **Close** before the app opens (no more interview that "never ends"), a fresh install starts with **one** session instead of five, and deleting a session actually sticks. The **board room** no longer hangs — instead of a "Start" button that spun forever, it gives honest feedback, with the budget-guarded auto-convene groundwork now in place (full in-app meetings land in an upcoming release).
+
 **2026-07-20 — One download really is the whole install now**
 The single `LeRoy UI` download button performs the complete install with no console window at any point: it confirms itself in-app, installs the LeRoy brain in the background with a real progress screen, walks you through the onboarding interview one question at a time (each answer saves immediately, so closing early never loses progress), and ends on a "Congratulations" screen — Close launches the running app. You end up with two Desktop shortcuts, "Leroy CLI" and "LeRoy UI", both correctly placed even if OneDrive has taken over your Desktop folder. A backend crash on a fresh machine now shows an error screen instead of silently doing nothing.
 

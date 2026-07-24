@@ -1,5 +1,28 @@
 # LeRoy UI — Changelog
 
+## v0.1.10 — 2026-07-23
+
+### Fixed — fresh-install experience (onboarding, sessions, and the board room)
+
+Everything reported from real first-run usage:
+
+- **Onboarding now finishes properly.** The app used to reveal itself partway through
+  the setup interview, so you never reached the "Congratulations / Close" screen and the
+  interview felt like it "never ended." LeRoy now stays in setup until you actually finish
+  and click **Close** — and an interview you close early is no longer mistaken for done.
+- **A fresh install opens with one session, not five.** New installs were pre-seeding five
+  sessions/conversations. You now start with a single session and add more yourself.
+- **Deleting a session sticks.** Deleted sessions were immediately respawning (a blank one
+  reappeared with a new id). A session you delete now stays gone (it's archived, recoverable).
+- **The board room no longer hangs.** In the packaged app "Start" used to spin forever with
+  no meeting ever appearing. It now gives an honest message when the board can't run, and the
+  scheduling groundwork (an in-app, budget-guarded auto-convene that's off by default) is in
+  place. Full board-room meetings in the installed app are landing in an upcoming release.
+
+> Note: if you completed onboarding on a **very early** build, the first launch after this
+> update may show the short interview once more (it's how we make "finished" reliable going
+> forward). Established installs with an existing memory vault are unaffected.
+
 ## v0.1.9 — 2026-07-21
 
 ### Fixed — sign-in now actually registers (you can finally connect + chat)
