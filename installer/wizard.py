@@ -665,6 +665,26 @@ def close(name: str) -> None:
     print("=" * 60 + "\n")
 
 
+def mark_interview_complete(dest: Path) -> Path:
+    """Write the authoritative onboarding-completion marker.
+
+    Distinct from config/autonomy.json (written mid-interview by phase5): the
+    backend's brain_interview_done detection reads THIS file, so completion is
+    only ever signalled after the full interview runs to the end."""
+    cfg_dir = dest / "config"
+    cfg_dir.mkdir(parents=True, exist_ok=True)
+    marker = cfg_dir / "onboarding_complete.json"
+    marker.write_text(
+        json.dumps({
+            "completed": True,
+            "completed_at": _dt.datetime.now(_dt.timezone.utc).isoformat(),
+            "wizard_version": 1,
+        }),
+        encoding="utf-8",
+    )
+    return marker
+
+
 def main(argv: list[str] | None = None) -> int:
     global JSON_MODE
 
@@ -701,6 +721,12 @@ def main(argv: list[str] | None = None) -> int:
     phase7_shortcut(dest)
 
     name = ctx.get("name", "there")
+    # Authoritative "interview finished" signal. MUST be written only here, after
+    # every phase has run — NOT at phase5 (config/autonomy.json). brain_interview_done
+    # detection keys off this marker so an interview interrupted after phase5 (with
+    # autonomy.json already on disk) is not mistaken for complete on the next launch,
+    # and the UI reveals only once the whole interview has actually finished.
+    mark_interview_complete(dest)
     if JSON_MODE:
         print(json.dumps({"type": "done", "name": name}), flush=True)
     else:
